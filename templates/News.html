@@ -1,0 +1,63 @@
+{% extends 'HeadnFoot.html' %}
+
+{% block title %}Home{% endblock %}
+{% block username %}{{username|default('Guest')}}{% endblock %}
+
+{% block dropdown %}
+    {% if username == 'Guest' %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="{{url_for('login')}}">Login</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('signup')}}">Sign Up</a>
+    </div>
+    {% else %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="{{url_for('profile')}}">Profile</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('myarticle')}}">My Article</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('edit')}}">Compose</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('record')}}">Record</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('logout')}}">Sign Out</a>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block mainContent %}
+
+<!-- Content -->
+<div id="newsPageTitleField">
+    <span id="newsPageTitle">News</span>   
+</div>
+<div class="row" style="margin-bottom: 0px !important">
+<aside class="col-sm-2">
+    <div style="width: 100%;height: 100%;background-color: palegoldenrod;margin: 0px;padding: 0px;opacity: 0.9;">
+        <button class="btn" style="width:100%;color: white;background-color: crimson;font-size: 25px">All</button>
+        <button class="btn" style="width:100%;color: white;background-color: #78C2AD;font-size: 25px">Hot</button>
+        <button class="btn" style="width:100%;color: white;background-color: #78C2AD;font-size: 25px">Event</button>
+        <button class="btn" style="width:100%;color: white;background-color: #78C2AD;font-size: 25px">System</button>
+    </div>
+</aside>
+<div class="col-sm-10" style="width: 100%;">
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: #78C2AD; border-radius: 10px;">
+        <div style="width: 100%;background-color: crimson;padding: 10px 20px 10px 20px; color: white;font-size: 25px;border-top-left-radius: 10px;border-top-right-radius: 10px">News Title</div>
+        <div style="padding-top:5px;padding-left: 30px; color: white">Content od News</div>
+    </div>
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: #78C2AD; border-radius: 10px;">
+        <div style="width: 100%;background-color: crimson;padding: 10px 20px 10px 20px; color: white;font-size: 25px;border-top-left-radius: 10px;border-top-right-radius: 10px">News Title</div>
+        <div style="padding-top:5px;padding-left: 30px; color: white">Content od News</div>
+    </div>
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: #78C2AD; border-radius: 10px;">
+        <div style="width: 100%;background-color: crimson;padding: 10px 20px 10px 20px; color: white;font-size: 25px;border-top-left-radius: 10px;border-top-right-radius: 10px">News Title</div>
+        <div style="padding-top:5px;padding-left: 30px; color: white">Content od News</div>
+    </div>
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: #78C2AD; border-radius: 10px;">
+        <div style="width: 100%;background-color: crimson;padding: 10px 20px 10px 20px; color: white;font-size: 25px;border-top-left-radius: 10px;border-top-right-radius: 10px">News Title</div>
+        <div style="padding-top:5px;padding-left: 30px; color: white">Content od News</div>
+    </div>
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: #78C2AD; border-radius: 10px;">
+        <div style="width: 100%;background-color: crimson;padding: 10px 20px 10px 20px; color: white;font-size: 25px;border-top-left-radius: 10px;border-top-right-radius: 10px">News Title</div>
+        <div style="padding-top:5px;padding-left: 30px; color: white">Content od News</div>
+    </div>
+</div>
+</div>
+<!--Content End-->
+
+{% endblock %}

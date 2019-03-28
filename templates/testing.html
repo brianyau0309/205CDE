@@ -1,0 +1,29 @@
+{% extends 'HeadnFoot.html' %}
+
+{% block title %}{{pageTitle}}{% endblock %}
+{% block username %}{{username|default('Guest')}}{% endblock %}
+
+{% block dropdown %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="{{url_for('profile')}}">Profile</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('myarticle')}}">My Article</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('edit')}}">Compose</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('record')}}">Record</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('logout')}}">Sign Out</a>
+    </div>
+{% endblock %}
+
+{% block mainContent %}
+
+<!-- Content -->
+<h1>file Input</h1>
+<form method="post" action="{{url_for('upload')}}" enctype='multipart/form-data'>
+    <div class="file-group">
+        <label for="file">File input: </label>
+        <input type="file" name="file" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Go</button>
+</form>
+<!--Content End-->
+
+{% endblock %}

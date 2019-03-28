@@ -1,0 +1,40 @@
+{% extends 'HeadnFoot.html' %}
+
+{% block title %}{{pageTitle}}{% endblock %}
+{% block username %}{{username|default('Guest')}}{% endblock %}
+
+{% block dropdown %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="{{url_for('profile')}}">Profile</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('myarticle')}}">My Article</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('edit')}}">Compose</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('record')}}">Record</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('logout')}}">Sign Out</a>
+    </div>
+{% endblock %}
+
+{% block mainContent %}
+
+<!-- Content -->
+<div id="newsPageTitleField">
+    <span id="newsPageTitle">{{pageTitle}}</span>   
+</div>
+<div class="row" style="margin-bottom: 0px !important">
+<div class="col-sm-12" style="width: 100%;">
+
+    {% for i in articles %}
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: white;">
+        <div style="width: 100%;background-color: #78C2AD;padding: 10px 20px 10px 20px; color: white;font-size: 25px;">{{i.title}}</div>
+        <div style="height: 67px;padding-top:5px;padding-left: 30px; color: gray">{{i.description}}</div>
+        <div style="width: 100%;height: 25px;padding-left: 10px;padding-right: 10px">
+            <span style="float: left;">Sales: {{i.sales}}</span>
+            <span style="float: right;">Date: {{i.date}}</span>
+        </div>
+    </div>
+    {% endfor %}
+
+</div>
+</div>
+<!--Content End-->
+
+{% endblock %}

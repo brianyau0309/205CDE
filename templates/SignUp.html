@@ -1,0 +1,96 @@
+{% extends 'HeadnFoot.html' %}
+
+{% block title %}SignUp{% endblock %}
+{% block username %}{{username|default('Guest')}}{% endblock %}
+
+{% block dropdown %}
+	<div class="dropdown-menu">
+	<a class="dropdown-item HelloItem" href="{{url_for('login')}}">Login</a>
+	<a class="dropdown-item HelloItem" href="{{url_for('signup')}}">Sign Up</a>
+	</div>
+{% endblock %}
+
+{% block mainContent %}
+<!-- Sign Up Page Content -->
+<section class="signUpPageContent">
+    <div id="signUpPageTitleField">
+        <span id="signUpPageTitle">Sign Up</span>
+    </div>
+    <div class="row">
+        <div class="col-sm-3"></div>
+        <div class="col-sm-6">
+            <div class="signUpField">
+                <div class="formTitleBackground">
+                    <p class="formTitleFont">
+                        Lets Sign up a CooKinGdom Account!
+                    </p>
+                </div>
+
+                <!--Form start-->
+                <form method="POST" action="{{url_for('signup_done')}}">
+                    <input class="form-control signUpUI" type="email" name="email" placeholder="Email" required>
+                    <input id="name" class="form-control signUpUI" type="text" name="name" placeholder="NickName (10 words)" required>
+                    <input id="password" class="form-control signUpUI" type="password" name="password" placeholder="Password (8-15 numbers and words)" minlength="8" required>
+					<input id="cpassword" class="form-control signUpUI" type="password" name="cpassword" placeholder="Confirm Password" minlength="8" required>
+					<div class="signUpUI">
+                        <input type="checkbox" name="agree" required>
+                        <span> I Agree To The <a href="#">Terms & Conditions</a></span>
+                    </div>
+                    <button id="btn_signup" class="btn btn-danger signUpUI" style="font-size:25px;display: block">Sign Up</button>
+                </form>
+                <!--Form End-->
+
+                <div class="signUpUIFooter">Already have a Account? <a href="{{url_for('login')}}">Login Now!</a></div>
+            </div>
+        </div>
+    </div>
+</section>
+<!--Content End-->
+<script type="text/javascript">
+    {% with messages = get_flashed_messages(category_filter=["email"]) %}
+    {% if messages %}
+    window.alert('Email Used')
+    {% endif %}
+    {% endwith %}
+    {% with messages = get_flashed_messages(category_filter=["error"]) %}
+    {% if messages %}
+    window.alert('Invaild Input')
+    {% endif %}
+    {% endwith %}
+    $('#name').on('keyup', function() {
+        if ($('#name').val().length > 10 || $('#name').val().length == 0) {
+            $('#name').removeClass("is-valid");
+            $('#name').addClass("is-invalid");
+	    $('#btn_signup').addClass('btn-disabled');
+        }else{
+            $('#name').removeClass("is-invalid");
+            $('#name').addClass("is-valid");
+	    $('#btn_signup').removeClass('btn-disabled');
+        };
+    })
+    $('#password').on('keyup', function() {
+        if ($('#password').val().length > 15 || $('#password').val().length < 8 || $('#password').val().length == 0) {
+            $('#password').removeClass("is-valid");
+            $('#password').addClass("is-invalid");
+	    $('#btn_signup').prop('disabled, false');
+        }else{
+            $('#password').removeClass("is-invalid");
+            $('#password').addClass("is-valid");
+	    $('#btn_signup').prop('disabled, true');
+        };
+    })
+    $('#password, #cpassword').on('keyup', function() {
+        if ($('#password').val() != $('#cpassword').val() || $('#cpassword').val().length == 0) {
+            $('#cpassword').removeClass("is-valid");
+            $('#cpassword').addClass("is-invalid");
+	    $('#btn_signup').prop('disabled, false');
+        }else{
+            $('#cpassword').removeClass("is-invalid");
+            $('#cpassword').addClass("is-valid");
+	    $('#btn_signup').prop('disabled, true');
+        };
+    })
+    
+</script>
+
+{% endblock %}

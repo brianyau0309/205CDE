@@ -1,0 +1,49 @@
+{% extends 'HeadnFoot.html' %}
+
+{% block title %}{{title}}{% endblock %}
+{% block username %}{{username|default('Guest')}}{% endblock %}
+
+{% block dropdown %}
+    {% if username == 'Guest' %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="{{url_for('login')}}">Login</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('signup')}}">Sign Up</a>
+    </div>
+    {% else %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="{{url_for('profile')}}">Profile</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('myarticle')}}">My Article</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('edit')}}">Compose</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('record')}}">Record</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('logout')}}">Sign Out</a>
+    </div>
+    {% endif %}
+{% endblock %}
+
+{% block mainContent %}
+
+<!--Content-->
+<section class="articlePageContent">
+    
+    <div class="articleInfo">
+        <div style="padding: 20px">
+            <span id="articleDate">{{date}}</span>
+            <span class="articlePrice">
+                <span>$ </span>
+                <span>{{ price }}</span>
+                <button type="button" class="btn btn-danger btnAddCart-Article" style="display: block">Add to Cart</button>
+                <button type="button" class="btn btnBuy-Article" style="display: block">Buy Now!</button>
+            </span>
+        </div>
+        <div id="articleTitle">{{ title }}</div>
+        <div class="articleAuthor">
+            <span>Author : {{ name }}</span>
+            <span id="Author"></span>
+        </div>
+    </div>
+    <p id="articleContent" class="articleContent">{{content|safe}}</p>
+
+</section>
+<!--Content End-->
+
+{% endblock %}
