@@ -14,6 +14,7 @@
   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="{{url_for('static', filename='AssignmentJS.js')}}"></script>
 	<!--External JavaScript End-->
+  <link rel="shortcut icon" href="#" />
 	
 </head>
 <body>
@@ -29,11 +30,14 @@
     <div class="collapse navbar-collapse" id="navbarColor01">
         <ul class="navbar-nav mr-auto">
       		<li class="nav-item">
-        		<a class="nav-link" href="#">News</a>
+        		<a class="nav-link" href="{{url_for('news', arg='all')}}">News</a>
       		</li>
       		<li class="nav-item">
         		<a class="nav-link" href="#">About</a>
       		</li>
+          <li class="nav-item">
+            <a class="nav-link" href="{{url_for('edit')}}">Compose</a>
+          </li>
     	</ul>
         <!--Dropdown Bootstrap-->
         <ul class="nav nav-pills">
@@ -45,50 +49,151 @@
     </div>
 </nav>
 <!--Navbar End-->
-<!-- Modal -->
-<div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{% if userInfo %}
+{% if userInfo != 'Guest' %}
+<!-- Modal - userInfo -->
+<div class="modal fade" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+      <div class="modal-header" style="background-color: #78C2AD">
+        <h5 class="modal-title" id="ModalLabel" style="color:white;">User Profile</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+          <span aria-hidden="true" style="color: white">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        <button data-toggle="modal" data-target="#Modal"></button>
+      <div class="modal-body" style="background-color: white;">
+        <div style="width: 100%;">
+                <img src="{% block usericon %}{%endblock%}" style="display: block;margin:auto;width: 150px;height: 150px;border: 2px solid gray;margin-bottom: 10px;">
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#iconModal" style="display: block;margin: auto;width: 100px;">Change</button>
+                </div>
+                <table style="color: gray; font-size: 22px;width: 100%;text-align: center;padding-top: 10px">
+                    <tr>
+                        <td colspan="2" style=";">Account Information</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;width: 30%">ClientID:</td>
+                        <td>{% block userID %}{% endblock %}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;width: 30%">Name:</td>
+                        <td>{% block userName %}{% endblock %}</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: right;width: 30%">Email:</td>
+                        <td>{% block userEmail %}{% endblock %}</td>
+                    </tr>
+                </table>
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#passwordModal" style="display: block;margin: auto;width: 60%;margin-top: 20px">Change password</button>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" style="width: 100%;">Close</button>
       </div>
     </div>
   </div>
 </div>
-<div class="modal fade" id="Modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<!-- Modal - userInfo - end -->
+
+<!-- Modal - icon -->
+<div class="modal fade" id="iconModal" tabindex="-1" role="dialog" aria-labelledby="iconModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+      <div class="modal-header" style="background-color: #78C2AD">
+        <h5 class="modal-title" id="iconModalLabel" style="color:white;">Changing Password</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
+          <span aria-hidden="true" style="color: white">&times;</span>
         </button>
       </div>
-      <div class="modal-body">
-        ...
+      <div class="modal-body" style="background-color: white;">
+        <form action="{{url_for('uploadicon')}}" method="post" enctype='multipart/form-data'>
+          <label>Choose a picture: </label>
+          <label style="display:block;">1. '.png' or '.jpg' only</label>
+          <label style="display: block;">2. length : width = 1:1</label>
+          <input class="form-control" type="file" name="icon" required>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="submit" class="btn btn-primary" style="width: 100%">Submit</button>
+        </form>
       </div>
     </div>
   </div>
 </div>
+
+
+<!-- Modal - password -->
+<div class="modal fade" id="passwordModal" tabindex="-1" role="dialog" aria-labelledby="passwordModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #78C2AD">
+        <h5 class="modal-title" id="passwordModalLabel" style="color:white;">Changing Password</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true" style="color: white">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="background-color: white;">
+        <form action="{{url_for('changePassword')}}" method="post">
+          <input id="opassword" class="form-control" type="password" name="opassword" placeholder="Old Password" required>
+          <input id="npassword" class="form-control" type="password" name="npassword" placeholder="New Password(8-15)" style="margin-top: 10px;" required>
+          <input id="confirm" class="form-control" type="password" name="confirm" placeholder="Confirm Password" style="margin-top: 10px;" required>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSubmit" type="submit" class="btn btn-primary" style="width: 100%" disabled>Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endif %}
+<!-- Modal - password - end -->
 {% block mainContent %}{% endblock %}
 
 <!--Footer-->
 <footer></footer>
 <!--Footer End-->
+{% if userInfo %}
+{% if userInfo != 'Guest' %}
+<script>
+  $('#opassword').on('keyup', function() {
+    if ($('#opassword').val() != '{{userInfo.password}}') {
+      $('#opassword').removeClass("is-valid");
+      $('#opassword').addClass("is-invalid");
+    }else{
+      $('#opassword').removeClass("is-invalid");
+      $('#opassword').addClass("is-valid");
+    }
+  })
 
+  $('#npassword, #confirm').on('keyup', function() {
+    if ($('#npassword').val() != $('#confirm').val()) {
+      $('#confirm').removeClass("is-valid");
+      $('#confirm').addClass("is-invalid");
+    }else{
+      $('#confirm').removeClass("is-invalid");
+      $('#confirm').addClass("is-valid");
+    }
+  })
+
+
+  $('#npassword').on('keyup', function() {
+    if ($('#npassword').val().length > 15 || $('#npassword').val().length < 8 || $('#npassword').val().length == 0) {
+      $('#npassword').removeClass("is-valid");
+      $('#npassword').addClass("is-invalid");
+    }else{
+      $('#npassword').removeClass("is-invalid");
+      $('#npassword').addClass("is-valid");
+    };
+  })
+
+  $('#opassword, #npassword, #confirm').on('keyup', function() {
+    if ($('#opassword').hasClass('is-valid') && $('#npassword').hasClass('is-valid') && $('#confirm').hasClass('is-valid')) {
+      $('#btnSubmit').attr('disabled', false)
+    }else{
+      $('#btnSubmit').attr('disabled', true)
+    }
+  })
+
+</script>
+{% endif %}
+{% endif %}
 </body>
 </html>

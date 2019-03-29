@@ -57,6 +57,7 @@
     window.alert('Invaild Input')
     {% endif %}
     {% endwith %}
+    
     $('#name').on('keyup', function() {
         if ($('#name').val().length > 10 || $('#name').val().length == 0) {
             $('#name').removeClass("is-valid");

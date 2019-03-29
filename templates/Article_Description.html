@@ -1,9 +1,12 @@
 {% extends 'HeadnFoot.html' %}
 
-{% block title %}{{pageTitle}}{% endblock %}
+{% block title %}{{title}}{% endblock %}
+
 {% block username %}
 {% if userInfo %}
+{% if userInfo != 'Guest' %}
 <img src="{{url_for('static', filename=userInfo.icon)}}" style="max-width: 30px;max-height: 30px">
+{% endif %}
 {{userInfo.nickname|default('Guest')}}
 {% endif %}
 {% endblock %}
@@ -35,30 +38,28 @@
 {% endif %}{% endif %}
 
 {% block mainContent %}
-
-<!-- Content -->
-<div id="newsPageTitleField">
-    <span id="newsPageTitle">{{pageTitle}}</span>   
-</div>
-<div class="row" style="margin-bottom: 0px !important">
-<div class="col-sm-12" style="width: 100%;">
-
-    {% for i in articles %}
-    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: white;">
-        <img src="{{url_for('static',filename=i.image)}}" style="float: left; width:30%;height: 150px">
-        <div>
-            <a href="{{url_for('article', aID=i.articleID)}}"><div style="width: 100%;background-color: #78C2AD;padding: 10px 20px 10px 20px; color: white;font-size: 25px;">&nbsp;{{i.title}}</div></a>
-            <div style="height: 67px;padding-top:5px;padding-left: 30px; color: gray">&nbsp;&nbsp;{{i.description}}</div>
-            <div style="width: 100%;height: 25px;padding-left: 10px;padding-right: 10px">
-                <span style="float: left;">&nbsp;Sales: {{i.sales}}</span>
-                <span style="float: right;">Date: {{i.date}}</span>
-            </div>
+<!--Content-->
+<section class="articlePageContent">
+    
+    <div class="articleInfo">
+        <div style="padding: 20px">
+            <span id="articleDate">{{date}}</span>
+            <span class="articlePrice">
+                <span>$ </span>
+                <span>{{ price }}</span>
+                <button type="button" class="btn btn-danger btnAddCart-Article" style="display: block">Add to Cart</button>
+                <button type="button" class="btn btnBuy-Article" style="display: block">Buy Now!</button>
+            </span>
+        </div>
+        <div id="articleTitle">{{ title }}</div>
+        <div class="articleAuthor">
+            <span>Author : {{ name }}</span>
+            <span id="Author"></span>
         </div>
     </div>
-    {% endfor %}
+    <p id="articleContent" class="articleContent">{{description|safe}}</p>
 
-</div>
-</div>
+</section>
 <!--Content End-->
 
 {% endblock %}

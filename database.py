@@ -25,11 +25,14 @@ SELECT * FROM client WHERE email = '{email}'
 	'clientInfo_ID':'''
 SELECT * FROM client WHERE clientID = {clientID}
 ''',
+	'changePassword':'''
+UPDATE `client` SET password = '{p}' WHERE clientID = {id}
+''',
 	'signup':'''
 INSERT INTO client (email, nickname, password) value ('{e}','{n}','{p}')
 ''',
 	'newArticle':'''
-INSERT INTO article (`title`, `price`, `description`, `content`, `date`, `owner`) value ('{t}','{p}','{des}','{c}','{date}','{o}')
+INSERT INTO article (`title`, `price`, `description`, `content`, `date`, `owner`,`category`) value ('{t}','{p}','{des}','{c}','{date}','{o}','{category}')
 ''',
 	'articleInfo':'''
 SELECT * FROM article WHERE articleID = '{ID}'
@@ -37,7 +40,13 @@ SELECT * FROM article WHERE articleID = '{ID}'
 	'articleInfo_owner':'''
 SELECT * FROM article WHERE owner = '{ID}' ORDER BY `date` DESC
 ''',
+	'record_owner':'''
+SELECT `recordID`,`articleID`,`title`,record.`date`,`price`,`description`,`content`,`sales`,`category` FROM record LEFT JOIN article ON record.article = article.articleID WHERE record.owner = '{ID}' ORDER BY `date` DESC
+''',
 	'hot_item':'''
-SELECT * from article ORDER BY `sales` DESC LIMIT 8
+SELECT * FROM article ORDER BY `sales` DESC LIMIT 8
+''',
+	'checkRecord':'''
+SELECT * FROM record WHERE owner = {clientID} and article = {articleID}
 '''
 }

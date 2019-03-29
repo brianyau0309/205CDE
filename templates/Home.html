@@ -1,25 +1,43 @@
 {% extends 'HeadnFoot.html' %}
 
 {% block title %}Home{% endblock %}
-{% block username %}{{username|default('Guest')}}{% endblock %}
+
+{% block username %}
+{% if userInfo %}
+{% if userInfo != 'Guest' %}
+<img src="{{url_for('static', filename=userInfo.icon)}}" style="max-width: 30px;max-height: 30px">
+{% endif %}
+{{userInfo.nickname|default('Guest')}}
+{% endif %}
+{% endblock %}
 
 {% block dropdown %}
-	{% if username == 'Guest' %}
+	{% if userInfo == 'Guest' %}
 	<div class="dropdown-menu">
 	<a class="dropdown-item HelloItem" href="{{url_for('login')}}">Login</a>
 	<a class="dropdown-item HelloItem" href="{{url_for('signup')}}">Sign Up</a>
 	</div>
 	{% else %}
 	<div class="dropdown-menu">
-    <a class="dropdown-item HelloItem" herf='#' data-toggle="modal" data-target="#profileModal">Profile</a>
+    <a class="dropdown-item HelloItem" href="#" data-toggle="modal" data-target="#profileModal">Profile</a>
 
     <a class="dropdown-item HelloItem" href="{{url_for('myarticle')}}">My Article</a>
-    <a class="dropdown-item HelloItem" href="{{url_for('edit')}}">Compose</a>
     <a class="dropdown-item HelloItem" href="{{url_for('record')}}">Record</a>
     <a class="dropdown-item HelloItem" href="{{url_for('logout')}}">Sign Out</a>
 	</div>
 	{% endif %}
 {% endblock %}
+
+
+{% if userInfo %}
+{% if userInfo != 'Guest' %}
+{% block usericon %}{% if userInfo %}{{url_for('static', filename=userInfo.icon)}}{% endif %}{% endblock %}
+{% block userID %}{% if userInfo %}{{userInfo.clientID}}{% endif %}{% endblock %}
+{% block userName %}{% if userInfo %}{{userInfo.nickname}}{% endif %}{% endblock %}
+{% block userEmail %}{% if userInfo %}{{userInfo.email}}{% endif %}{% endblock %}
+{% endif %}{% endif %}
+
+
 
 {% block mainContent %}
 <!-- Carousel Bootstrap -->
@@ -116,7 +134,7 @@
 	<!--item 1-->
 	<div class="col-sm-3">
         <div id="item1" class="item">
-			<img id="itemImage1" class="itemImage" src="{{item.image}}">
+			<img id="itemImage1" class="itemImage" src="{{url_for('static',filename=item.image)}}">
             <p id="itemTitle1" class="itemTitle">{{item.title}}</p>
         	<div>
         		<span class="itemAuthor">Aurther: 
@@ -130,7 +148,7 @@
             <div id="itemConten1" class="itemContent">{{item.description}}</div>
             <div style="width: 100%;opacity: 0.9">
                 <button type="button" class="btn btn-danger btnAddCart">Add to Cart</button>
-                <button type="button" class="btn btn-primary btnMore">More</button>
+                <a href="{{url_for('article_description', aID=item.articleID)}}"><button type="button" class="btn btn-primary btnMore">More</button></a>
             </div>
         </div>
 	</div>
@@ -169,5 +187,37 @@
 	<!--row 3 End-->
 </article>
 <!--Example Content End-->
+<script>
+{% with iconError = get_flashed_messages(category_filter=["iconError"]) %}
+{% if iconError %}
+window.alert('image format error')
+{% endif %}
+{% endwith %}
+{% with iconSuccess = get_flashed_messages(category_filter=["iconSuccess"]) %}
+{% if iconSuccess %}
+window.alert('Success')
+{% endif %}
+{% endwith %}
+{% with passwordSuccess = get_flashed_messages(category_filter=["passwordSuccess"]) %}
+{% if passwordSuccess %}
+window.alert('Change Password Success')
+{% endif %}
+{% endwith %}
+{% with compose = get_flashed_messages(category_filter=["compose"]) %}
+{% if compose %}
+window.alert('Compose Success')
+{% endif %}
+{% endwith %}
+{% with imgError = get_flashed_messages(category_filter=["imgError"]) %}
+{% if imgError %}
+window.alert('Invalid Image, Article Compose without image')
+{% endif %}
+{% endwith %}
+{% with buy = get_flashed_messages(category_filter=["buy"]) %}
+{% if buy %}
+window.alert('You can only read it after buy it.')
+{% endif %}
+{% endwith %}
 
+</script>
 {% endblock %}
