@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>{% block title %}{% endblock %} - CookinGdom</title>
+	<title>{% block title %}{% endblock %} - CooKinGdom</title>
     
 	<!--External CSS-->
-	<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='AssignmentCSS.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='AssignmentCSS.css')}}">
     <link rel="stylesheet" href="{{url_for('static',filename='bootstrap.css')}}">
-    <!--External CSS End-->
+  <!--External CSS End-->
 
 	<!--External JavaScript-->
   	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -14,7 +14,6 @@
   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="{{url_for('static', filename='AssignmentJS.js')}}"></script>
 	<!--External JavaScript End-->
-  <link rel="shortcut icon" href="#" />
 	
 </head>
 <body>
@@ -33,10 +32,16 @@
         		<a class="nav-link" href="{{url_for('news', arg='all')}}">News</a>
       		</li>
       		<li class="nav-item">
-        		<a class="nav-link" href="#">About</a>
+        		<a class="nav-link" href="{{url_for('about')}}">About</a>
       		</li>
           <li class="nav-item">
             <a class="nav-link" href="{{url_for('edit')}}">Compose</a>
+          </li>
+          <li class="nav-item">
+            <form class="form-inline" action="{{url_for('search')}}">
+              <input name="q" class="form-control" type="text" placeholder="Search by Article Title" style="margin: 2px;background-color: #78C2AD;border-radius: 0px;color: white;" required>
+              <button class="btn btn-secondary" type="submit" style="background-color: crimson; border-radius: 0px">Go</button>
+            </form>
           </li>
     	</ul>
         <!--Dropdown Bootstrap-->
@@ -49,6 +54,8 @@
     </div>
 </nav>
 <!--Navbar End-->
+
+
 {% if userInfo %}
 {% if userInfo != 'Guest' %}
 <!-- Modal - userInfo -->
@@ -142,14 +149,114 @@
     </div>
   </div>
 </div>
-{% endif %}
-{% endif %}
 <!-- Modal - password - end -->
+
+{% if cart %}
+<!-- Modal - cart -->
+<div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="cartModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #78C2AD">
+        <h5 class="modal-title" id="cartModalLabel" style="color:white;">Shopping Cart</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true" style="color: white">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="background-color: white;">
+
+        {% if cart == 'Nothing' %}
+        <div style="width: 100%;text-align: center;">Nothing in Cart</div>
+        {% else %}
+        {% for i in cart %}
+          <div style="width: 100%;height: 150px;border: 5px solid white;">
+            <div style="display: inline;width: 40%;height: 100%;float: left;">
+              <img src="{{url_for('static', filename=i.image)}}" style="width: 100%;height: 100%;border-right: 5px solid #78C2AD;">
+            </div>
+            <div style="display: inline;width: 60%;height: 100%;float: right;background-color: #78C2AD;color: white;">
+              <div style="width: 100%; height: 80%">
+                <div style="font-size: 20px">{{ i.title }}</div>
+                <div style="font-size: 15px">Author: {{ i.author }}</div>
+                <div style="font-size: 15px">Category: {{ i.category }}</div>
+              </div>
+              <div style="width: 100%; height: 30%;">
+                <span style="float: left;">Price: {{ i.price }}</span>
+                <form action="{{url_for('cart_del')}}" method="post">
+                  <input type="hidden" name="article" value="{{ i.articleID }}">
+                  <button type="submit" class="btn-danger" style=";float: right;width: 10%;height: 10%;border-radius: 0px">&times;</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        {% endif %}
+
+      </div>
+      <div class="modal-footer">
+        <form action="{{url_for('purchase')}}" method="post" style="width: 100%">
+        <button id="btnPurchase" type="submit" class="btn btn-primary" style="width: 100%">Purchase All</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal - cart - end -->
+{% endif %}
+{% endif %}
+{% endif %}
 {% block mainContent %}{% endblock %}
 
 <!--Footer-->
-<footer></footer>
+<footer>
+  <div class="row" style="color:white">
+  <div class="col-sm-3" style="text-align: center;">
+    <div style="font-size: 30px; padding-top: 20px">Contact us</div>
+    <div style="width:100%;height: 65%;">
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+    </div>
+    <div style="width:100%;height: 20%;text-align: left;margin-left: 25px;padding-bottom: 55px ">
+      <select class="form-control" style="width: 50%">
+        <option>English</option>
+      </select>
+    </div>
+  </div>
+  <div class="col-sm-3" style="text-align: center;">
+    <div style="font-size: 30px; padding-top: 20px">About us</div>
+    <div style="width:100%;height: 65%;">
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+    </div>
+  </div>
+  <div class="col-sm-3" style="text-align: center;">
+    <div style="font-size: 30px; padding-top: 20px">Information</div>
+    <div style="width:100%;height: 65%;">
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+    </div>
+  </div>
+  <div class="col-sm-3" style="text-align: center;">
+    <div style="font-size: 30px; padding-top: 20px">New</div>
+    <div style="width:100%;height: 65%;">
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px">item</div>
+    </div>
+  </div>
+  </div>
+</footer>
 <!--Footer End-->
+
+
+
+
 {% if userInfo %}
 {% if userInfo != 'Guest' %}
 <script>
@@ -191,7 +298,11 @@
       $('#btnSubmit').attr('disabled', true)
     }
   })
-
+{% with opencart = get_flashed_messages(category_filter=["opencart"]) %}
+{% if opencart %}
+$('#cartModal').modal('show');
+{% endif %}
+{% endwith %}
 </script>
 {% endif %}
 {% endif %}

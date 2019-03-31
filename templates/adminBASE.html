@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Admin - CooKinGdom</title>
+	<meta http-equiv="refresh" content="30">
+
+	<!--External CSS-->
+    <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='table.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.css')}}">
+  <!--External CSS End-->
+
+	<!--External JavaScript-->
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<!--External JavaScript End-->
+
+</head>
+<body style="margin: auto;width: 80%;font-family: Montserrat">
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="{{url_for('admin')}}" style="background-color: transparent !important;">CooKinGdom</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#dropdown" aria-controls="dropdown" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="dropdown">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('admin_manage', arg='client')}}">Client</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('admin_manage', arg='article')}}">Article</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('admin_manage', arg='comment')}}">Comment</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('admin_manage', arg='carousel')}}">Carousel</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">News</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('admin_manage', arg='revenue')}}">Revenue</a>
+      </li>
+    </ul>
+
+    <ul class="nav">
+        <li class="nav-item show"><a class="nav-link" href="{{url_for('admin_out')}}">Logout</a></li>
+    </ul>
+  </div>
+</nav>
+<div style="width: 100%;height: 50px;background-color: #f8f9fa;margin-top: 3px;">
+	<span style="display: inline-block;margin-top: 7px;margin-left: 15px;font-size: 25px;">{{title}}</span>
+</div>
+{% block main %}
+{% endblock %}
+
+</body>
+</html>

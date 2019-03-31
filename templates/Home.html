@@ -20,7 +20,7 @@
 	{% else %}
 	<div class="dropdown-menu">
     <a class="dropdown-item HelloItem" href="#" data-toggle="modal" data-target="#profileModal">Profile</a>
-
+    <a class="dropdown-item HelloItem" href="#" data-toggle="modal" data-target="#cartModal">Cart</a>
     <a class="dropdown-item HelloItem" href="{{url_for('myarticle')}}">My Article</a>
     <a class="dropdown-item HelloItem" href="{{url_for('record')}}">Record</a>
     <a class="dropdown-item HelloItem" href="{{url_for('logout')}}">Sign Out</a>
@@ -100,18 +100,18 @@
 	</div>
 </div>
 <div class="row">
-	<div class="col-sm-3">
+	<div class="col-sm-3"><a href="{{url_for('category',arg='chinese')}}">
 		<img id="ChineseFood" class="btnCategory" src="static/image/Category/ChineseFood.jpg" alt="ChineseFood">
-	</div>
-	<div class="col-sm-3">
+	</a></div>
+	<div class="col-sm-3"><a href="{{url_for('category',arg='europe')}}">
 		<img id="EuropeFood" class="btnCategory" src="static/image/Category/EuropeFood.jpg" alt="EuropeFood">
-	</div>
-	<div class="col-sm-3">
+	</a></div>
+	<div class="col-sm-3"><a href="{{url_for('category',arg='japanese')}}">
 		<img id="JapaneseFood" class="btnCategory" src="static/image/Category/JapaneseFood.jpg" alt="JapaneseFood">
-	</div>
-	<div class="col-sm-3">
+	</a></div>
+	<div class="col-sm-3"><a href="{{url_for('category',arg='other')}}">
 		<img id="OthersFood" class="btnCategory" src="static/image/Category/OthersFood.jpg" alt="OthersFood">
-	</div>
+	</a></div>
 </div>
 </section>
 <!--Category End-->
@@ -131,7 +131,7 @@
 <!--row 2-->
 <div class="row" style="margin-bottom: 50px;">
 	{% for item in hot_1 %}
-	<!--item 1-->
+	<!--item -->
 	<div class="col-sm-3">
         <div id="item1" class="item">
 			<img id="itemImage1" class="itemImage" src="{{url_for('static',filename=item.image)}}">
@@ -147,12 +147,17 @@
             <hr class="forItem">
             <div id="itemConten1" class="itemContent">{{item.description}}</div>
             <div style="width: 100%;opacity: 0.9">
-                <button type="button" class="btn btn-danger btnAddCart">Add to Cart</button>
-                <a href="{{url_for('article_description', aID=item.articleID)}}"><button type="button" class="btn btn-primary btnMore">More</button></a>
+                <form action="{{url_for('addtocart')}}" method="post">
+                    <input type="hidden" name="articleID" value="{{item.articleID}}">
+                    <button type="submit" class="btn btn-danger btnAddCart">Add to Cart</button>
+                </form>
+                <a href="{{url_for('article_description', aID=item.articleID)}}">
+                    <button type="button" class="btn btn-primary btnMore">More</button>
+                </a>
             </div>
         </div>
 	</div>
-	<!--item 1 End-->
+	<!--item End-->
 	{% endfor %}
 </div>
 <!-- row 2 end -->
@@ -176,8 +181,13 @@
             <hr class="forItem">
             <div id="itemConten1" class="itemContent">{{item.description}}</div>
             <div style="width: 100%;opacity: 0.9">
-                <button type="button" class="btn btn-danger btnAddCart">Add to Cart</button>
-                <button type="button" class="btn btn-primary btnMore">More</button>
+                <form action="{{url_for('addtocart')}}" method="post">
+                    <input type="hidden" name="articleID" value="{{item.articleID}}">
+                    <button type="submit" class="btn btn-danger btnAddCart">Add to Cart</button>
+                </form>
+                <a href="{{url_for('article_description', aID=item.articleID)}}">
+                    <button type="button" class="btn btn-primary btnMore">More</button>
+                </a>
             </div>
         </div>
 	</div>
@@ -218,6 +228,5 @@ window.alert('Invalid Image, Article Compose without image')
 window.alert('You can only read it after buy it.')
 {% endif %}
 {% endwith %}
-
 </script>
 {% endblock %}

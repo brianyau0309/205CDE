@@ -1,0 +1,88 @@
+{% extends 'adminBASE.html' %}
+
+{% block main %}
+<div style="width: 100%;background-color: #f8f9fa;margin-top: 3px;padding-bottom: 30px">
+	<div style="padding-left: 5px;">Result: {{result}}</div>
+
+	<table style="width: 90%;margin: auto;text-align: right;">
+		{% if tablehead %}
+		<thead>
+			<tr style="border-bottom: 2px solid gray;text-align: center">
+				{% for i in tablehead %}
+				<td>{{i}}</td>
+				{% endfor %}
+			</tr>
+		</thead>
+		{% endif %}
+
+		{% if clientData %}
+		<tbody>
+			{% for i in clientData %}
+			<tr class="tableRow" onclick="document.location='{{i.url}}';" style="text-align: center;">
+				<td>{{i.clientID}}</td>
+				<td>{{i.nickname}}</td>
+				<td>{{i.email}}</td>
+				<td>{{i.password}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% endif %}
+
+		{% if articleData %}
+		<tbody>
+			{% for i in articleData %}
+			<tr class="tableRow" onclick="document.location='{{i.url}}';" style="text-align: center">
+				<td>{{i.articleID}}</td>
+				<td>{{i.category}}</td>
+				<td>{{i.owner}}</td>
+				<td>{{i.title}}</td>
+				<td>{{i.price}}</td>
+				<td>{{i.sales}}</td>
+				<td>{{i.date}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% endif %}
+
+		{% if commentData %}
+		<tbody>
+			{% for i in commentData %}
+			<tr class="tableRow" onclick="document.location='{{i.url}}';" style="text-align: center">
+				<td>{{i.commentID}}</td>
+				<td>{{i.article}}</td>
+				<td>{{i.author}}</td>
+				<td>{{i.date}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% endif %}
+
+		{% if revenueData %}
+		<tbody>
+			{% for i in revenueData %}
+			<tr class="tableRow" style="text-align: center;">
+				<td>{{i.date}}</td>
+				<td>{{i.revenue}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% endif %}
+
+		{% if Carousel %}
+		<tbody>
+			<tr class="tableRow" onclick="document.location='{{Carousel.C1}}';" style="text-align: center;">
+				<td>Carousel Image 1</td>
+			</tr>
+			<tr class="tableRow" onclick="document.location='{{Carousel.C2}}';" style="text-align: center;">
+				<td>Carousel Image 2</td>
+			</tr>
+			<tr class="tableRow" onclick="document.location='{{Carousel.C3}}';" style="text-align: center;">
+				<td>Carousel Image 3</td>
+			</tr>
+		</tbody>
+		{% endif %}
+
+	</table>
+
+</div>
+{% endblock %}

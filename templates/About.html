@@ -1,0 +1,64 @@
+{% extends 'HeadnFoot.html' %}
+
+{% block title %}About us{% endblock %}
+
+{% block username %}
+{% if userInfo %}
+{% if userInfo != 'Guest' %}
+<img src="{{url_for('static', filename=userInfo.icon)}}" style="max-width: 30px;max-height: 30px">
+{% endif %}
+{{userInfo.nickname|default('Guest')}}
+{% endif %}
+{% endblock %}
+
+{% block dropdown %}
+    {% if userInfo == 'Guest' %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="{{url_for('login')}}">Login</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('signup')}}">Sign Up</a>
+    </div>
+    {% else %}
+    <div class="dropdown-menu">
+    <a class="dropdown-item HelloItem" href="#" data-toggle="modal" data-target="#profileModal">Profile</a>
+    <a class="dropdown-item HelloItem" href="#" data-toggle="modal" data-target="#cartModal">Cart</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('myarticle')}}">My Article</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('record')}}">Record</a>
+    <a class="dropdown-item HelloItem" href="{{url_for('logout')}}">Sign Out</a>
+    </div>
+    {% endif %}
+{% endblock %}
+
+
+{% if userInfo %}
+{% if userInfo != 'Guest' %}
+{% block usericon %}{% if userInfo %}{{url_for('static', filename=userInfo.icon)}}{% endif %}{% endblock %}
+{% block userID %}{% if userInfo %}{{userInfo.clientID}}{% endif %}{% endblock %}
+{% block userName %}{% if userInfo %}{{userInfo.nickname}}{% endif %}{% endblock %}
+{% block userEmail %}{% if userInfo %}{{userInfo.email}}{% endif %}{% endblock %}
+{% endif %}{% endif %}
+
+
+
+{% block mainContent %}
+<!--Content-->
+<section class="loginPageContent">
+    <div id="loginPageTitleField">
+        <span id="loginPageTitle">About us</span>
+    </div>
+    <div style="width:100%">
+        <div style="width: 80%;margin: auto;background-color: white;min-height: 800px">
+            <div style="padding: 20px;font-size: 40px">What is CooKinGom?</div>
+            <div style="padding: 30px;font-size: 20px">a long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long long description.</div>
+            <div style="padding: 20px;font-size: 40px">Q&A:</div>
+            <div style="padding: 30px;font-size: 20px">Q1. Here is question!</div>
+            <div style="padding: 30px;font-size: 18px">Ans. Here is answer!</div>
+            <div style="padding: 30px;font-size: 20px">Q2. Here is question!</div>
+            <div style="padding: 30px;font-size: 18px">Ans. Here is answer!</div>
+            <div style="padding: 30px;font-size: 20px">Q3. Here is question!</div>
+            <div style="padding: 30px;font-size: 18px">Ans. Here is answer!</div>
+            <div style="padding: 30px;font-size: 20px">Q4. Here is question!</div>
+            <div style="padding: 30px;font-size: 18px">Ans. Here is answer!</div>
+        </div>
+    </div>
+<!--Content end-->
+{% endblock %}

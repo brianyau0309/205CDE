@@ -37,12 +37,14 @@
 {% block mainContent %}
 
 <!--Content-->
+{% if data %}
 <div id="editPageTitleField">
     <span id="editPageTitle">Edit Your Article</span>
 </div>
 <div style="width: 80%;margin: auto;margin-bottom: 50px;margin-top: 20px">
-    <form action="{{url_for('edit_done')}}" method="post" enctype='multipart/form-data' style="display: block">
+    <form action="{{url_for('own_edit_done')}}" method="post" enctype='multipart/form-data' style="display: block">
         <div style="margin-bottom: 10px;display: block">
+            <input type="hidden" name="articleID" value="{{articleID}}">
             <button type="submit" class="btn btn-primary" style="float: left;margin-bottom: 5px">Save and Compose</button>
             <button onClick="javascript:history.go(-1)" class="btn btn-primary" style="float: right;margin-bottom: 5px">Cancel and Back</button>
         </div>
@@ -51,19 +53,37 @@
                 <input class="form-control" type="file" name="img" style="width : 100%;border-radius: 0px">
                 <label for="img">&nbsp;Select a image(.png or .jpg) to upload for your Article.</label>
             </div>
-            <input class="form-control" type="text" name="title" placeholder="Title of The Article" style="border-radius:0px !important;width: 100%;height: 40px;margin:auto" required>
+            <input class="form-control" type="text" name="title" placeholder="Title of The Article" style="border-radius:0px !important;width: 100%;height: 40px;margin:auto" value="{{data.title}}" required>
             <select class="form-control" name="category" style="border-radius: 0px" required>
-                <option>Chinese</option>
-                <option>Europe</option>
-                <option>Japanese</option>
-                <option>Other</option>
+                {% if data.category == 'chinese' %}
+                <option selected>chinese</option>
+                <option>europe</option>
+                <option>japanese</option>
+                <option>other</option>
+                {% elif data.category == 'europe' %}
+                <option >chinese</option>
+                <option selected>europe</option>
+                <option>japanese</option>
+                <option>other</option>
+                {% elif data.category == 'japanese' %}
+                <option>chinese</option>
+                <option>europe</option>
+                <option selected>japanese</option>
+                <option>other</option>
+                <% elif data.category == 'other' %}
+                <option>chinese</option>
+                <option>europe</option>
+                <option>japanese</option>
+                <option selected>other</option>
+                {% endif %}
             </select>
-            <input class="form-control" type="number" step="any" name="price" placeholder="Price(HKD)" style="border-radius:0px !important;width: 100%;height: 40px;margin:auto" required>
-            <input class="form-control" type="text" name="description" placeholder="Article Description" style="border-radius:0px !important;width: 100%;height: 40px;margin:auto" required>
-            <textarea class="form-control" name="content" placeholder="Article Content" style="width: 100%;height: 400px; margin-top: 10px; border-radius: 0px" required></textarea>
+            <input class="form-control" type="number" step="any" name="price" placeholder="Price(HKD)" style="border-radius:0px !important;width: 100%;height: 40px;margin:auto" value="{{data.price}}" required>
+            <input class="form-control" type="text" name="description" placeholder="Article Description" style="border-radius:0px !important;width: 100%;height: 40px;margin:auto" value="{{data.description}}" required>
+            <textarea class="form-control" name="content" placeholder="Article Content" style="width: 100%;height: 400px; margin-top: 10px; border-radius: 0px" required>{{data.content}}</textarea>
         </div>
     </form>
 </div>
+{% endif %}
 <!--Content End-->
 
 {% endblock %}

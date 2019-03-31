@@ -1,0 +1,6 @@
+.tableRow {
+	border-bottom: 1px solid lightgray;
+}
+.tableRow:hover {
+	background-color: #f4c242;
+}

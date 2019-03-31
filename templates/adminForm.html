@@ -1,0 +1,187 @@
+{% extends 'adminBASE.html' %}
+
+{% block main %}
+<div style="width: 100%;background-color: #f8f9fa;margin-top: 3px;">
+
+{% if type == 'client' %}
+<form class="form-inline" action="{{url_for('edit_client')}}" method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">clientID: </td>
+				<td style="text-align: center;">
+					{{data.clientID}}
+					<input type="hidden" name="clientID" value="{{data.clientID}}">
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">nickname: </td>
+				<td><input class="form-control" type="text" name="name" value="{{data.nickname}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">email: </td>
+				<td><input class="form-control" type="text" name="email" value="{{data.email}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">password: </td>
+				<td><input class="form-control" type="text" name="password" value="{{data.password}}" required></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+{% if type == 'article' %}
+<form class="form-inline" action="{{url_for('edit_article')}}" enctype='multipart/form-data' method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">aritcleID: </td>
+				<td style="text-align: center;">
+					{{data.articleID}}
+					<input type="hidden" name="articleID" value="{{data.articleID}}">
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">ownerID: </td>
+				<td style="text-align: center;">{{data.owner}}</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">sales: </td>
+				<td style="text-align: center;">{{data.sales}}</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">date: </td>
+				<td style="text-align: center;">{{data.date}}</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">category: </td>
+				<td>
+					<select name="category" required="">
+						{% if data.category == 'chinese' %}
+						<option selected>chinese</option>
+						<option>europe</option>
+						<option>japanese</option>
+						<option>other</option>
+						{% elif data.category == 'europe' %}
+						<option >chinese</option>
+						<option selected>europe</option>
+						<option>japanese</option>
+						<option>other</option>
+						{% elif data.category == 'japanese' %}
+						<option>chinese</option>
+						<option>europe</option>
+						<option selected>japanese</option>
+						<option>other</option>
+						{% elif data.category == 'other' %}
+						<option>chinese</option>
+						<option>europe</option>
+						<option>japanese</option>
+						<option selected>other</option>
+						{% endif %}
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">title: </td>
+				<td><input name="title" class="form-control" type="text" name="email" value="{{data.title}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">price: </td>
+				<td><input name="price" class="form-control" type="text" name="number" step="any" value="{{data.price}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">description: </td>
+				<td><input name="description" class="form-control" type="text" name="text" value="{{data.description}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">content: </td>
+				<td><textarea name="content" style="width: 800px;height: 400px" required>{{data.content}}</textarea></td>
+			</tr>
+			<tr>
+				<td>Image:</td>
+				<td>
+					<div style="width: 100%">
+						<img style="width: 250px;height: 150px;" src="{{url_for('static',filename=data.image)}}">
+                		<input class="form-control" type="file" name="img" style="width : 100%;border-radius: 0px">
+                		<label for="img">&nbsp;Select a image(.png or .jpg) to upload for your Article.</label>
+            		</div>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+{% if type == 'comment' %}
+<form class="form-inline" action="{{url_for('edit_comment')}}" enctype='multipart/form-data' method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">commentID: </td>
+				<td style="text-align: center;">
+					{{data.commentID}}
+					<input type="hidden" name="commentID" value="{{data.commentID}}">
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">article: </td>
+				<td style="text-align: center;">{{data.article}}</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">author: </td>
+				<td style="text-align: center;">{{data.author}}</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">date: </td>
+				<td style="text-align: center;">{{data.date}}</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">content: </td>
+				<td><textarea name="comment" style="width: 800px;height: 200px" required>{{data.comment}}</textarea></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+{% if type == 'carousel' %}
+<form class="form-inline" action="{{url_for('edit_carousel')}}" enctype='multipart/form-data' method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">Carousel No. : </td>
+				<td style="text-align: left;">&nbsp;&nbsp;
+					{{data.num}}
+					<input type="hidden" name="num" value="{{data.num}}">
+				</td>
+			</tr>
+			<tr>
+				<td>Image:</td>
+				<td>
+					<div style="width: 100%">
+						<img style="width: 500px;height: 300px;margin: auto;" src="{{url_for('static',filename=data.image)}}">
+                		<input class="form-control" type="file" name="img" style="width : 100%;border-radius: 0px">
+                		<label for="img">&nbsp;Select a image(.png or .jpg) to upload for your Article.</label>
+            		</div>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+</div>
+{% endblock %}

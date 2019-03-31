@@ -41,12 +41,87 @@ SELECT * FROM article WHERE articleID = '{ID}'
 SELECT * FROM article WHERE owner = '{ID}' ORDER BY `date` DESC
 ''',
 	'record_owner':'''
-SELECT `recordID`,`articleID`,`title`,record.`date`,`price`,`description`,`content`,`sales`,`category` FROM record LEFT JOIN article ON record.article = article.articleID WHERE record.owner = '{ID}' ORDER BY `date` DESC
+SELECT `recordID`,`articleID`,`title`,record.`date`,`price`,`description`,`content`,`sales`,`category` FROM record LEFT JOIN article ON record.article = article.articleID WHERE record.owner = {ID} ORDER BY `date` DESC
+''',
+	'cart_owner':'''
+SELECT `inCartID`,`articleID`, article.`owner`,`title`,`price`,`category` FROM cart LEFT JOIN article ON cart.article = article.articleID WHERE cart.owner = {ID}
 ''',
 	'hot_item':'''
 SELECT * FROM article ORDER BY `sales` DESC LIMIT 8
 ''',
 	'checkRecord':'''
 SELECT * FROM record WHERE owner = {clientID} and article = {articleID}
+''',
+	'checkCart':'''
+SELECT * FROM cart WHERE article = {articleID} and owner = {clientID}
+''',
+	'add2cart':'''
+INSERT INTO cart (`article`, `owner`) value ({articleID}, {clientID})
+''',
+	'buyone':'''
+INSERT INTO record (`article`, `owner`, `date`) value ({articleID}, {clientID}, '{date}')
+''',
+	'cart_del':'''
+DELETE FROM cart WHERE `owner` = {clientID} and `article` = {articleID}
+''',
+	'cart_delAll':'''
+DELETE FROM cart WHERE `owner` = {clientID}
+''',
+	'cartInfo':'''
+SELECT * FROM cart WHERE `owner` = {clientID}
+''',
+	'categoryResult':'''
+SELECT * FROM article WHERE `category` = '{c}' ORDER BY `date` DESC
+''',
+	'searching_title':'''
+SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `date` DESC
+''',
+	'adminInfo_ac':'''
+SELECT adminID,account,password FROM admin WHERE account = '{ac}'
+''',
+	'adminInfo_id':'''
+SELECT * FROM admin WHERE adminID = {id}
+''',
+	'allClient':'''
+SELECT * FROM client
+''',
+	'allArticle':'''
+SELECT * FROM article
+''',
+	'allRevenue':'''
+SELECT * FROM revenue
+''',
+	'allComment':'''
+SELECT * FROM comment
+''',
+	'updateClient':'''
+UPDATE client SET email = '{e}', nickname = '{n}', password = '{p}' WHERE clientID = '{ID}'
+''',
+	'updateArticle':'''
+UPDATE article SET category = '{cate}',title = '{t}',price = '{p}',description = '{d}',content = '{cont}' WHERE articleID = {ID}
+''',
+	'revenueInfo':'''
+SELECT * FROM revenue WHERE `date` = '{date}'
+''',
+	'newRevenue':'''
+INSERT INTO revenue (`date`,`revenue`) VALUE ('{d}',{r})
+''',
+	'updateRevenue':'''
+UPDATE revenue SET `revenue` = {r}
+''',
+	'comment':'''
+INSERT INTO comment (`article`,`author`,`comment`,`date`) VALUE ({a},{o},'{c}','{d}')
+''',
+	'getComment':'''
+SELECT * FROM comment WHERE article = {ID} ORDER BY `date` DESC
+''',
+	'commentInfo':'''
+SELECT * FROM comment WHERE commentID = {ID}
+''',
+	'updateSales':'''
+UPDATE article SET `sales` = {s} WHERE `articleID` = {ID}
+''',
+	'updateComment':'''
+UPDATE comment SET `comment` = '{c}' WHERE `commentID` = {ID}
 '''
 }

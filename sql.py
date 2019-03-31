@@ -2,14 +2,15 @@ from database import connection,SQL
 from pathlib import Path
 import os
 
-'''db = connection()
+db = connection()
 
-data = db.exe_fetch(SQL['hot_item'],'all')
-a = data[:4]
-b = data[4:]
-print(a)
-print(b)
+items = db.exe_fetch(SQL['categoryResult'].format(c='other'),'all')
+itemIn4 = []
+while len(items) != 0:
+	if len(items) >= 4:
+		itemIn4.append([items.pop(0),items.pop(0),items.pop(0),items.pop(0)])
+	else:
+		itemIn4.append(items)
+		items = []
 
-db.close()'''
-user = 1
-print(Path(os.getcwd()+'/static/image/icom/'+str(user)+'.png').exists())
+print(itemIn4)
