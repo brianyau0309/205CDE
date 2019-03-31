@@ -98,7 +98,7 @@ SELECT * FROM comment
 UPDATE client SET email = '{e}', nickname = '{n}', password = '{p}' WHERE clientID = '{ID}'
 ''',
 	'updateArticle':'''
-UPDATE article SET category = '{cate}',title = '{t}',price = '{p}',description = '{d}',content = '{cont}' WHERE articleID = {ID}
+UPDATE article SET category = '{cate}',title = '{t}',price = '{p}',description = "{d}",content = "{cont}" WHERE articleID = {ID}
 ''',
 	'revenueInfo':'''
 SELECT * FROM revenue WHERE `date` = '{date}'
@@ -110,7 +110,7 @@ INSERT INTO revenue (`date`,`revenue`) VALUE ('{d}',{r})
 UPDATE revenue SET `revenue` = {r}
 ''',
 	'comment':'''
-INSERT INTO comment (`article`,`author`,`comment`,`date`) VALUE ({a},{o},'{c}','{d}')
+INSERT INTO comment (`article`,`author`,`comment`,`date`) VALUE ({a},{o},"{c}","{d}")
 ''',
 	'getComment':'''
 SELECT * FROM comment WHERE article = {ID} ORDER BY `date` DESC

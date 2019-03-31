@@ -1,6 +1,14 @@
 {% extends 'adminBASE.html' %}
 
 {% block main %}
+{% if max %}
+<div style="width: 100%;height: 50px;background-color: #f8f9fa;margin-top: 3px;">
+	<form action="{{url_for('admin_manage', arg='comment_search')}}" method="get" style="display: inline;">
+		<input type="number" min=1 max={{max}} name="articleID" placeholder="Search by Article ID" style="width: 200px;margin-top: 8px;margin-left: 10px" required>
+		<button type="submit" class="btn btn-default" style="color: gray">Go</button>
+	</form>
+</div>
+{% endif %}
 <div style="width: 100%;background-color: #f8f9fa;margin-top: 3px;padding-bottom: 30px">
 	<div style="padding-left: 5px;">Result: {{result}}</div>
 

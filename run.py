@@ -226,7 +226,7 @@ def edit_done():
 		title = request.form['title']
 		price = request.form['price']
 		description = request.form['description']
-		content = request.form['content']
+		content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
 		category = request.form['category'].lower()
 		date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -273,7 +273,7 @@ def own_edit_done():
 			title = request.form['title']
 			price = request.form['price']
 			description = request.form['description']
-			content = request.form['content']
+			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
 			category = request.form['category'].lower()
 
 			db.exe_commit(SQL['updateArticle'].format(cate=category,t=title,p=price,d=description,cont=content,ID=articleID))
@@ -325,7 +325,7 @@ def comment():
 	if session.get('clientID') != None:
 		user = session['clientID']
 		article = request.form['articleID']
-		comment = request.form['comment']
+		comment = request.form['comment'].replace('\'','\\\'').replace('\"','\\\"')
 		date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 		db.exe_commit(SQL['comment'].format(a=article,o=user,c=comment,d=date))
@@ -684,12 +684,23 @@ def admin_manage(arg):
 			return render_template('adminTable.html',title='Carousel',tablehead=th,Carousel=url,result=result)
 		elif arg == 'comment': 
 			allComment = db.exe_fetch(SQL['allComment'],'all')
+			maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
 			result = len(allComment)
 			th = ['commentID','article','author','date']
 			for i in allComment:
 				i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
 
-			return render_template('adminTable.html',title='Comment',tablehead=th,commentData=allComment,result=result)
+			return render_template('adminTable.html',title='Comment',tablehead=th,commentData=allComment,result=result,max=maxArticle)
+		elif arg == 'comment_search': 
+			articleID = request.args.get('articleID')
+			maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
+			searchComment = db.exe_fetch(SQL['getComment'].format(ID=articleID),'all')
+			result = len(searchComment)
+			th = ['commentID','article','author','date']
+			for i in searchComment:
+				i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
+
+			return render_template('adminTable.html',title='Comment',tablehead=th,commentData=searchComment,result=result,max=maxArticle)
 		elif arg == 'news': 
 			pass
 	else:
@@ -761,7 +772,7 @@ def edit_article():
 			title = request.form['title']
 			price = request.form['price']
 			description = request.form['description']
-			content = request.form['content']
+			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
 			file = request.files['img']
 
 			if file and allowed_file(file.filename):
@@ -786,7 +797,7 @@ def edit_comment():
 		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
 		if 'W' in adminInfo['article']:
 			commentID = request.form['commentID']
-			comment = request.form['comment']
+			comment = request.form['comment'].replace('\'','\\\'').replace('\"','\\\"')
 			print(SQL['updateComment'].format(c=comment,ID=commentID))
 			db.exe_commit(SQL['updateComment'].format(c=comment,ID=commentID))
 
