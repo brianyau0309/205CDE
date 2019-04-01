@@ -10,9 +10,16 @@
 </div>
 {% endif %}
 <div style="width: 100%;background-color: #f8f9fa;margin-top: 3px;padding-bottom: 30px">
-	<div style="padding-left: 5px;">Result: {{result}}</div>
+	<div style="padding-left: 5px;">Result: {{result}} 
+		{% if compose %}
+		<a href="{{url_for('composeNews')}}"><button class="btn btn-default" style="float: right;color: white;background-color: gray;border-radius: 0">Compose</button></a>
+		{% endif %}
+		{% if allAdminData %}
+		<a href="{{url_for('newAdmin')}}"><button class="btn btn-default" style="float: right;color: white;background-color: gray;border-radius: 0">New</button></a>
+		{% endif %}
+	</div>
 
-	<table style="width: 90%;margin: auto;text-align: right;">
+	<table style="width: 90%;margin: auto;text-align: right;margin-top: 14px ">
 		{% if tablehead %}
 		<thead>
 			<tr style="border-bottom: 2px solid gray;text-align: center">
@@ -60,6 +67,39 @@
 				<td>{{i.article}}</td>
 				<td>{{i.author}}</td>
 				<td>{{i.date}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% endif %}
+
+		{% if newsData %}
+		<tbody>
+			{% for i in newsData %}
+			<tr class="tableRow" onclick="document.location='{{i.url}}';" style="text-align: center">
+				<td>{{i.newsID}}</td>
+				<td>{{i.type}}</td>
+				<td>{{i.title}}</td>
+				<td>{{i.author}}</td>
+				<td>{{i.date}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% endif %}
+
+		{% if allAdminData %}
+		<tbody>
+			{% for i in allAdminData %}
+			<tr class="tableRow" onclick="document.location='{{i.url}}';" style="text-align: center">
+				<td>{{i.adminID}}</td>
+				<td>{{i.account}}</td>
+				<td>{{i.password}}</td>
+				<td>{{i.client}}</td>
+				<td>{{i.article}}</td>
+				<td>{{i.comment}}</td>
+				<td>{{i.carousel}}</td>
+				<td>{{i.news}}</td>
+				<td>{{i.revenue}}</td>
+				<td>{{i.admin}}</td>
 			</tr>
 			{% endfor %}
 		</tbody>

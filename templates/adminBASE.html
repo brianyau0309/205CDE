@@ -24,24 +24,42 @@
   </button>
   <div class="collapse navbar-collapse" id="dropdown">
     <ul class="navbar-nav mr-auto">
+      {% if 'N' not in adminData.client %}
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('admin_manage', arg='client')}}">Client</a>
       </li>
+      {% endif %}
+      {% if 'N' not in adminData.article %}
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('admin_manage', arg='article')}}">Article</a>
       </li>
+      {% endif %}
+      {% if 'N' not in adminData.comment %}
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('admin_manage', arg='comment')}}">Comment</a>
       </li>
+      {% endif %}
+      {% if 'N' not in adminData.carousel %}
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('admin_manage', arg='carousel')}}">Carousel</a>
       </li>
+      {% endif %}
+      {% if 'N' not in adminData.news %}
       <li class="nav-item">
-        <a class="nav-link" href="#">News</a>
+        <a class="nav-link" href="{{url_for('admin_manage', arg='news')}}">News</a>
       </li>
+      {% endif %}
+      {% if 'N' not in adminData.revenue %}
       <li class="nav-item">
         <a class="nav-link" href="{{url_for('admin_manage', arg='revenue')}}">Revenue</a>
       </li>
+      {% endif %}
+      {% if 'Normal' not in adminData.admin %}
+      <li class="nav-item">
+        <a class="nav-link" href="{{url_for('admin_manage', arg='admin')}}">Admin</a>
+      </li>
+      {% endif %}
+
     </ul>
 
     <ul class="nav">

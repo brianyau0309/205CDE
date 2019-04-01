@@ -4,3 +4,10 @@
 .tableRow:hover {
 	background-color: #f4c242;
 }
+.authorizedName {
+	text-align: right;
+	width: 30%;
+}
+.authorized {
+	text-align: center;
+}

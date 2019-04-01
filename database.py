@@ -2,7 +2,7 @@ import pymysql
 
 class connection():
 	def __init__(self):
-		self.connection = pymysql.connect(user='user1', password='0000', db='205Assignment', cursorclass=pymysql.cursors.DictCursor)
+		self.connection = pymysql.connect(user='user1', password='0000', db='205CDE', cursorclass=pymysql.cursors.DictCursor)
 		self.cursor = self.connection.cursor()
 
 	def exe_fetch(self, SQL, fetch = 'one'):
@@ -76,6 +76,15 @@ SELECT * FROM article WHERE `category` = '{c}' ORDER BY `date` DESC
 	'searching_title':'''
 SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `date` DESC
 ''',
+	'searching_title_byPriceL2H':'''
+SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `price` ASC
+''',
+	'searching_title_byPriceH2L':'''
+SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `price` DESC
+''',
+	'searching_title_bySales':'''
+SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `sales` ASC
+''',
 	'adminInfo_ac':'''
 SELECT adminID,account,password FROM admin WHERE account = '{ac}'
 ''',
@@ -94,6 +103,21 @@ SELECT * FROM revenue
 	'allComment':'''
 SELECT * FROM comment
 ''',
+	'allNews':'''
+SELECT * FROM news
+''',
+	'allNews_desc':'''
+SELECT * FROM news ORDER BY `date` DESC
+''',
+	'allNews_desc_event':'''
+SELECT * FROM news WHERE type = 'event' ORDER BY `date` DESC
+''',
+	'allNews_desc_system':'''
+SELECT * FROM news WHERE type = 'system' ORDER BY `date` DESC
+''',
+	'allAdmin':'''
+SELECT * FROM admin
+''',
 	'updateClient':'''
 UPDATE client SET email = '{e}', nickname = '{n}', password = '{p}' WHERE clientID = '{ID}'
 ''',
@@ -106,8 +130,23 @@ SELECT * FROM revenue WHERE `date` = '{date}'
 	'newRevenue':'''
 INSERT INTO revenue (`date`,`revenue`) VALUE ('{d}',{r})
 ''',
+	'newNews':'''
+INSERT INTO news (`title`,`content`,`date`,`author`,`type`) VALUE ('{t}','{c}','{d}','{a}','{type}')
+''',
+	'newAdmin':'''
+INSERT INTO admin (`account`,`password`,`client`,`article`,`comment`,`carousel`,`news`,`revenue`) VALUE ('{ac}','{p}','{client}','{article}','{comment}','{carousel}','{news}','{r}')
+''',
+	'newsInfo':'''
+SELECT * FROM news WHERE newsID = {ID}
+''',
+	'updateNews':'''
+UPDATE news SET type = '{type}',title = '{t}', content = '{c}' WHERE newsID = {ID}
+''',
 	'updateRevenue':'''
 UPDATE revenue SET `revenue` = {r}
+''',
+	'updateAdmin':'''
+UPDATE admin SET account = '{ac}', password = '{p}', client = '{client}', article = '{article}', comment = '{comment}', carousel = '{carousel}', news = '{news}', revenue = '{revenue}' WHERE adminID = {ID}
 ''',
 	'comment':'''
 INSERT INTO comment (`article`,`author`,`comment`,`date`) VALUE ({a},{o},"{c}","{d}")

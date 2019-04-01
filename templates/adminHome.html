@@ -2,10 +2,93 @@
 
 {% block main %}
 <div style="width: 100%;height: 90vh;background-color: #f8f9fa;margin-top: 3px;">
-	<span style="display: inline-block;margin: 20px;font-size: 20px;">
+	<span style="display: inline-block;width:100%;margin: 20px;font-size: 20px;">
 		<h3>Welcome to CooKinGdom Admin Page!</h3>
-		<p style="padding: 0px 20px 5px 20px">Admin : {{ac}}</p>
-		<p style="padding: 0px 20px 5px 20px">You can read and edit data here.</p>
+		<p style="padding: 0px 20px 5px 20px">Admin : {{adminData.account}}</p>
+		<p style="width:100%;text-align: center">What You Can Do?</p>
 	</span>
+	<table style="width: 50%;margin: auto;border-top: 2px dotted gray;font-size: 18px	">
+		<thead>
+			<tr style="border-bottom: 1px dotted gray">
+				<td colspan="2" style="text-align: center">Authorized</td>
+			</tr>
+		</thead>
+		<tbody>
+			{% if 'N' not in adminData.client %}
+			<tr>
+				<td class="authorizedName">Client :</td>
+				{% if 'RW' in adminData.client %}
+				<td class="authorized">READ, WRITE</td>
+				{% elif 'W' not in adminData.client %}
+				<td class="authorized">READ</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+
+			{% if 'N' not in adminData.article %}
+			<tr>
+				<td class="authorizedName">Article :</td>
+				{% if 'RW' in adminData.article %}
+				<td class="authorized">READ, WRITE</td>
+				{% elif 'W' not in adminData.article %}
+				<td class="authorized">READ</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+
+			{% if 'N' not in adminData.comment %}
+			<tr>
+				<td class="authorizedName">Comment :</td>
+				{% if 'RW' in adminData.comment %}
+				<td class="authorized">READ, WRITE</td>
+				{% elif 'W' not in adminData.comment %}
+				<td class="authorized">READ</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+
+			{% if 'N' not in adminData.carousel %}
+			<tr>
+				<td class="authorizedName">Carousel :</td>
+				{% if 'RW' in adminData.carousel %}
+				<td class="authorized">READ, WRITE</td>
+				{% elif 'W' not in adminData.carousel %}
+				<td class="authorized">READ</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+
+			{% if 'N' not in adminData.news %}
+			<tr>
+				<td class="authorizedName">News :</td>
+				{% if 'RW' in adminData.news %}
+				<td class="authorized">READ, WRITE</td>
+				{% elif 'W' not in adminData.news %}
+				<td class="authorized">READ</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+
+			{% if 'N' not in adminData.revenue %}
+			<tr>
+				<td class="authorizedName">Revenue :</td>
+				<td class="authorized">READ</td>
+			</tr>
+			{% endif %}
+
+			{% if 'N' not in adminData.admin %}
+			<tr>
+				<td class="authorizedName">Admin :</td>
+				{% if 'RW' in adminData.admin %}
+				<td class="authorized">READ, WRITE</td>
+				{% elif 'W' not in adminData.admin %}
+				<td class="authorized">READ</td>
+				{% endif %}
+			</tr>
+			{% endif %}
+			<tr style="border-top: 1px dotted gray;"></tr>
+
+		</tbody>
+	</table>
 </div>
 {% endblock %}

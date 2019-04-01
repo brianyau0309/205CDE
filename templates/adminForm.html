@@ -46,8 +46,8 @@
 				</td>
 			</tr>
 			<tr>
-				<td style="text-align: right;">ownerID: </td>
-				<td style="text-align: center;">{{data.owner}}</td>
+				<td style="text-align: right;">owner: </td>
+				<td style="text-align: center;"><a href="{{url_for('admin_edit',arg='client',ID=data.owner)}}">{{data.owner}}</a></td>
 			</tr>
 			<tr>
 				<td style="text-align: right;">sales: </td>
@@ -132,11 +132,11 @@
 			</tr>
 			<tr>
 				<td style="text-align: right;">article: </td>
-				<td style="text-align: center;">{{data.article}}</td>
+				<td style="text-align: center;"><a href="{{url_for('admin_edit',arg='article',ID=data.article)}}">{{data.article}}</a></td>
 			</tr>
 			<tr>
 				<td style="text-align: right;">author: </td>
-				<td style="text-align: center;">{{data.author}}</td>
+				<td style="text-align: center;"><a href="{{url_for('admin_edit',arg='client',ID=data.author)}}">{{data.author}}</a></td>
 			</tr>
 			<tr>
 				<td style="text-align: right;">date: </td>
@@ -173,6 +173,484 @@
                 		<input class="form-control" type="file" name="img" style="width : 100%;border-radius: 0px">
                 		<label for="img">&nbsp;Select a image(.png or .jpg) to upload for your Article.</label>
             		</div>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+{% if type == 'news' %}
+<form class="form-inline" action="{{url_for('edit_news')}}" method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">newsID: </td>
+				<td style="text-align: center;">
+					{{data.newsID}}
+					<input type="hidden" name="newsID" value="{{data.newsID}}">
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">author: </td>
+				<td style="text-align: center;"><a href="{{url_for('admin_edit',arg='admin',ID=data.author)}}">{{data.author}}</a></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">date: </td>
+				<td style="text-align: center;">{{data.date}}</td>
+			</tr>
+				<td style="text-align: right;">category: </td>
+				<td>
+					<select name="type" required>
+						{% if data.type == 'event' %}
+						<option selected>event</option>
+						<option>system</option>
+						{% elif data.type == 'system' %}
+						<option >event</option>
+						<option selected>system</option>
+						{% endif %}
+					</select>
+				</td>
+			<tr>
+				<td style="text-align: right;">Title: </td>
+				<td style="text-align: center;">
+ 					<input class="form-control" type="text" name="title" style="width: 100%" value="{{data.title}}" required>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">content: </td>
+				<td>
+					<textarea class="form-control" name="content" style="width: 800px;height: 200px" required>{{data.content}}</textarea>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+{% if type == 'composeNews' %}
+<form class="form-inline" action="{{url_for('composeNews_done')}}" method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">category: </td>
+				<td>
+					<select name="type" required>
+					<option>event</option>
+					<option>system</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">Title: </td>
+				<td style="text-align: center;">
+ 					<input class="form-control" type="text" name="title" style="width: 100%" required>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">content: </td>
+				<td>
+					<textarea class="form-control" name="content" style="width: 800px;height: 200px" required></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+{% if type == 'admin' %}
+<form class="form-inline" action="{{url_for('edit_admin')}}" method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">adminID: </td>
+				<td style="text-align: center;">
+					{{data.adminID}}
+					<input type="hidden" name="adminID" value="{{data.adminID}}">
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">account: </td>
+				<td><input class="form-control" type="text" name="account" value="{{data.account}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">password: </td>
+				<td><input class="form-control" type="text" name="password" value="{{data.password}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">client: </td>
+				<td>
+					{% if data.client == 'RW' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="RW" checked>
+						RW
+					</label>
+					{% elif data.client == 'R' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="R" checked>
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="RW" >
+						RW
+					</label>
+					{% elif data.client == 'N' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="N" required checked>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="RW" >
+						RW
+					</label>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">article: </td>
+				<td>
+					{% if data.article == 'RW' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="RW" checked>
+						RW
+					</label>
+					{% elif data.article == 'R' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="R" checked>
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="RW" >
+						RW
+					</label>
+					{% elif data.article == 'N' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="N" required checked>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="RW" >
+						RW
+					</label>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">comment: </td>
+				<td>
+					{% if data.comment == 'RW' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="RW" checked>
+						RW
+					</label>
+					{% elif data.comment == 'R' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="R" checked>
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="RW">
+						RW
+					</label>
+					{% elif data.comment == 'N' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="N" required checked>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="RW" >
+						RW
+					</label>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">carousel: </td>
+				<td>
+					{% if data.carousel == 'RW' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="RW" checked>
+						RW
+					</label>
+					{% elif data.carousel == 'R' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="R" checked>
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="RW" >
+						RW
+					</label>
+					{% elif data.carousel == 'N' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="N" required checked>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="RW">
+						RW
+					</label>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">news: </td>
+				<td>
+					{% if data.news == 'RW' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="RW" checked>
+						RW
+					</label>
+					{% elif data.news == 'R' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="R" checked>
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="RW" >
+						RW
+					</label>
+					{% elif data.news == 'N' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="N" required checked>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="RW" >
+						RW
+					</label>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">revenue: </td>
+				<td>
+					{% if data.revenue == 'R' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="revenue" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="revenue" value="R" checked>
+						R
+					</label>
+					{% elif data.revenue == 'N' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="revenue" value="N" required checked>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="revenue" value="R">
+						R
+					</label>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
+			</tr>
+	</div>
+</form>
+{% endif %}
+
+{% if type == 'newAdmin' %}
+<form class="form-inline" action="{{url_for('newAdmin_create')}}" method="post" style="width: 100%">
+	<div style="margin: auto;margin-top: 20px;margin-bottom: 20px;">
+		<table>
+			<tr>
+				<td style="text-align: right;">account: </td>
+				<td><input class="form-control" type="text" name="account" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">password: </td>
+				<td><input class="form-control" type="text" name="password" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">client: </td>
+				<td>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="client" value="RW">
+						RW
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">article: </td>
+				<td>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="article" value="RW">
+						RW
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">comment: </td>
+				<td>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="comment" value="RW">
+						RW
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">carousel: </td>
+				<td>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="carousel" value="RW">
+						RW
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">news: </td>
+				<td>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="R" >
+						R
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="news" value="RW">
+						RW
+					</label>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">revenue: </td>
+				<td>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="revenue" value="N" required>
+						N
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="revenue" value="R">
+						R
+					</label>
 				</td>
 			</tr>
 			<tr>

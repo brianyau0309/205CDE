@@ -223,9 +223,9 @@ def edit():
 def edit_done():
 	if session.get('clientID') != None:
 		clientID = session.get('clientID')
-		title = request.form['title']
+		title = request.form['title'].replace('\'','\\\'').replace('\"','\\\"')
 		price = request.form['price']
-		description = request.form['description']
+		description = request.form['description'].replace('\'','\\\'').replace('\"','\\\"')
 		content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
 		category = request.form['category'].lower()
 		date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -270,9 +270,9 @@ def own_edit_done():
 		author = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['clientID']
 		if user == author:
 			file = request.files['img']		
-			title = request.form['title']
+			title = request.form['title'].replace('\'','\\\'').replace('\"','\\\"')
 			price = request.form['price']
-			description = request.form['description']
+			description = request.form['description'].replace('\'','\\\'').replace('\"','\\\"')
 			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
 			category = request.form['category'].lower()
 
@@ -600,10 +600,18 @@ def about():
 
 #Searching
 ###############################################################################################
-@app.route('/search', methods=['get'])
-def search():
+@app.route('/search/<path:sort>/', methods=['get'])
+def search(sort):
 	q = request.args.get('q')
-	items = db.exe_fetch(SQL['searching_title'].format(q=q),'all')
+	if sort == 'newest':
+		items = db.exe_fetch(SQL['searching_title'].format(q=q),'all')
+	elif sort == 'priceL2H':
+		items = db.exe_fetch(SQL['searching_title_byPriceL2H'].format(q=q),'all')
+	elif sort == 'priceH2L':
+		items = db.exe_fetch(SQL['searching_title_byPriceH2L'].format(q=q),'all')
+	elif sort == 'sales':
+		items = db.exe_fetch(SQL['searching_title_bySales'].format(q=q),'all')
+
 	result = len(items)
 	for i in items:
 		ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=i['owner']))['nickname']
@@ -623,7 +631,7 @@ def search():
 			itemIn4.append(items)
 			items = []
 
-	return render_template('Category.html',userInfo=get_user(),cart=get_cart(),category='Search',description='Key: ' + q, result=result,items=itemIn4)
+	return render_template('Category.html',userInfo=get_user(),cart=get_cart(),category='Search',description='Key: ' + q, result=result,items=itemIn4,q=q)
 ###############################################################################################s
 
 #News
@@ -631,7 +639,63 @@ def search():
 @app.route('/news/<path:arg>')
 def news(arg):
 	if arg == 'all':
-		return render_template('News.html', userInfo=get_user(),cart=get_cart())
+		items = db.exe_fetch(SQL['allNews_desc'],'all')
+
+	if arg == 'event':
+		items = db.exe_fetch(SQL['allNews_desc_event'],'all')
+
+	if arg == 'system':
+		items = db.exe_fetch(SQL['allNews_desc_system'],'all')
+
+	for i in items:
+		i['content'] = i['content'].replace('\n','<br>')
+	
+	itemIn3 = []
+	while len(items) != 0:
+		if len(items) >= 3:
+			itemIn3.append([items.pop(0),items.pop(0),items.pop(0)])
+		else:
+			itemIn3.append(items)
+			items = []
+
+	return render_template('News.html', userInfo=get_user(),cart=get_cart(),news=itemIn3)
+
+@app.route('/news_content/<path:nID>')
+def news_content(nID):
+	news = db.exe_fetch(SQL['newsInfo'].format(ID=nID))
+	news['content'] = news['content'].replace('\n','<br>')
+	return render_template('News_content.html',news=news)
+
+@app.route('/composeNews')
+def composeNews():
+	if session.get('admin') != None:
+		admin = session['admin']
+		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
+		if 'W' in adminInfo['article']:
+			return render_template('adminForm.html',title='Compose News',type='composeNews')
+		else:
+			message = 'You are not allow to edit.'
+			return render_template('back.html',title='Error',message=message)
+
+
+@app.route('/compoeseNews_done', methods=['post'])
+def composeNews_done():
+	if session.get('admin') != None:
+		admin = session['admin']
+		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
+		if 'W' in adminInfo['news']:
+			newsType = request.form['type']
+			title = request.form['title'].replace('\'','\\\'').replace('\"','\\\"')
+			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
+			date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+			db.exe_commit(SQL['newNews'].format(t=title,c=content,d=date,a=admin,type=newsType))
+
+			return redirect(url_for('admin_manage',arg='news'))
+		else:
+			message = 'You are not allow to edit.'
+			return render_template('back.html',title='Error',message=message)
+
 ###############################################################################################
 #News end
 
@@ -642,7 +706,7 @@ def admin():
 	if session.get('admin') != None:
 		admin = session['admin']
 		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
-		return render_template('adminHome.html',title='Admin', ac=adminInfo['account'])
+		return render_template('adminHome.html',title='Admin',adminData=adminInfo)
 	else:
 		return redirect(url_for('login'))
 
@@ -652,57 +716,111 @@ def admin_manage(arg):
 		admin = session['admin']
 		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
 		if arg == 'client':
-			allClient = db.exe_fetch(SQL['allClient'],'all')
-			result = len(allClient)
-			th = ['clientID','nickname','email','password']
-			for i in allClient:
-				i['url'] = url_for('admin_edit',arg='client',ID=i['clientID'])
+			if 'R' in adminInfo['client']:
+				allClient = db.exe_fetch(SQL['allClient'],'all')
+				result = len(allClient)
+				th = ['clientID','nickname','email','password']
+				for i in allClient:
+					i['url'] = url_for('admin_edit',arg='client',ID=i['clientID'])
 
-			return render_template('adminTable.html',title='Client',tablehead=th,clientData=allClient,result=result)
+				return render_template('adminTable.html',title='Client',tablehead=th,clientData=allClient,result=result,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 		elif arg == 'article':
-			allArticle = db.exe_fetch(SQL['allArticle'],'all')
-			result = len(allArticle)
-			th = ['articleID','category','owner','title','price','sales','date']
-			for i in allArticle:
-				i['url'] = url_for('admin_edit',arg='article',ID=i['articleID'])
+			if 'R' in adminInfo['article']:
+				allArticle = db.exe_fetch(SQL['allArticle'],'all')
+				result = len(allArticle)
+				th = ['articleID','category','owner','title','price','sales','date']
+				for i in allArticle:
+					i['url'] = url_for('admin_edit',arg='article',ID=i['articleID'])
 
-			return render_template('adminTable.html',title='Article',tablehead=th,articleData=allArticle,result=result)
-		elif arg == 'revenue': 
-			allRevenue = db.exe_fetch(SQL['allRevenue'],'all')
-			result = len(allRevenue)
-			th = ['date','revenue(HKD)']
+				return render_template('adminTable.html',title='Article',tablehead=th,articleData=allArticle,result=result,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
 
-			return render_template('adminTable.html',title='Revenue',tablehead=th,revenueData=allRevenue,result=result)
+		elif arg == 'revenue':
+			if 'R' in adminInfo['revenue']: 
+				allRevenue = db.exe_fetch(SQL['allRevenue'],'all')
+				result = len(allRevenue)
+				th = ['date','revenue(HKD)']
+
+				return render_template('adminTable.html',title='Revenue',tablehead=th,revenueData=allRevenue,result=result,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 		elif arg == 'carousel':
-			result = 3
-			url = {}
-			url['C1'] = url_for('admin_edit',arg='carousel',ID=1)
-			url['C2'] = url_for('admin_edit',arg='carousel',ID=2)
-			url['C3'] = url_for('admin_edit',arg='carousel',ID=3)
-			th = ['Carousel Image No.'] 
+			if 'R' in adminInfo['carousel']: 
+				result = 3
+				url = {}
+				url['C1'] = url_for('admin_edit',arg='carousel',ID=1)
+				url['C2'] = url_for('admin_edit',arg='carousel',ID=2)
+				url['C3'] = url_for('admin_edit',arg='carousel',ID=3)
+				th = ['Carousel Image No.'] 
 
-			return render_template('adminTable.html',title='Carousel',tablehead=th,Carousel=url,result=result)
-		elif arg == 'comment': 
-			allComment = db.exe_fetch(SQL['allComment'],'all')
-			maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
-			result = len(allComment)
-			th = ['commentID','article','author','date']
-			for i in allComment:
-				i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
+				return render_template('adminTable.html',title='Carousel',tablehead=th,Carousel=url,result=result,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
 
-			return render_template('adminTable.html',title='Comment',tablehead=th,commentData=allComment,result=result,max=maxArticle)
+		elif arg == 'comment':
+			if 'R' in adminInfo['comment']:  
+				allComment = db.exe_fetch(SQL['allComment'],'all')
+				maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
+				result = len(allComment)
+				th = ['commentID','article','author','date']
+				for i in allComment:
+					i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
+
+				return render_template('adminTable.html',title='Comment',tablehead=th,commentData=allComment,result=result,max=maxArticle,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 		elif arg == 'comment_search': 
-			articleID = request.args.get('articleID')
-			maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
-			searchComment = db.exe_fetch(SQL['getComment'].format(ID=articleID),'all')
-			result = len(searchComment)
-			th = ['commentID','article','author','date']
-			for i in searchComment:
-				i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
+			if 'R' in adminInfo['comment']: 
+				articleID = request.args.get('articleID')
+				maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
+				searchComment = db.exe_fetch(SQL['getComment'].format(ID=articleID),'all')
+				result = len(searchComment)
+				th = ['commentID','article','author','date']
+				for i in searchComment:
+					i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
 
-			return render_template('adminTable.html',title='Comment',tablehead=th,commentData=searchComment,result=result,max=maxArticle)
+				return render_template('adminTable.html',title='Comment',tablehead=th,commentData=searchComment,result=result,max=maxArticle,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 		elif arg == 'news': 
-			pass
+			if 'R' in adminInfo['news']: 
+				allNews = db.exe_fetch(SQL['allNews'],'all')
+				result = len(allNews)
+				th = ['newsID', 'type','title','author','date']
+				for i in allNews:
+					i['url'] = url_for('admin_edit',arg='news',ID=i['newsID'])
+
+				return render_template('adminTable.html',title='News',tablehead=th,newsData=allNews,result=result,compose='Yes',adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
+		elif arg == 'admin': 
+			if 'Super' in adminInfo['admin']: 
+				allAdmin = db.exe_fetch(SQL['allAdmin'],'all')
+				result = len(allAdmin)
+				th = ['adminID', 'account','password','client','article','comment','carousel','news','revenue','admin']
+				for i in allAdmin:
+					i['url'] = url_for('admin_edit',arg='admin',ID=i['adminID'])
+
+				return render_template('adminTable.html',title='Admin',tablehead=th,allAdminData=allAdmin,result=result,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 	else:
 		return redirect(url_for('login'))
 
@@ -711,35 +829,73 @@ def admin_edit(arg,ID):
 	if session.get('admin') != None:
 		admin = session['admin']
 		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
+
 		if arg == 'client':
-			clientData = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=ID))
-			return render_template('adminForm.html',title='Client',type='client',data=clientData)
-		elif arg == 'article':
-			articleData = db.exe_fetch(SQL['articleInfo'].format(ID=ID))
-			if Path(os.getcwd()+'/static/image/article/'+str(articleData['articleID'])+'.png').exists():
-				articleData['image'] = 'image/article/'+str(articleData['articleID'])+'.png'
-			elif Path(os.getcwd()+'/static/image/article/'+str(articleData['articleID'])+'.jpg').exists():
-				articleData['image'] = 'image/article/'+str(articleData['articleID'])+'.jpg'
+			if 'R' in adminInfo['client']: 
+				clientData = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=ID))
+				return render_template('adminForm.html',title='Client',type='client',data=clientData,adminData=adminInfo)
 			else:
-				articleData['image'] = 'image/article/default.png'
-			
-			return render_template('adminForm.html',title='Article',type='article',data=articleData)
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
+		elif arg == 'article':
+			if 'R' in adminInfo['article']: 
+				articleData = db.exe_fetch(SQL['articleInfo'].format(ID=ID))
+
+				if Path(os.getcwd()+'/static/image/article/'+str(articleData['articleID'])+'.png').exists():
+					articleData['image'] = 'image/article/'+str(articleData['articleID'])+'.png'
+				elif Path(os.getcwd()+'/static/image/article/'+str(articleData['articleID'])+'.jpg').exists():
+					articleData['image'] = 'image/article/'+str(articleData['articleID'])+'.jpg'
+				else:
+					articleData['image'] = 'image/article/default.png'
+				
+				return render_template('adminForm.html',title='Article',type='article',data=articleData,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 		elif arg == 'carousel': 
-			carouselData = {}
-			carouselData['num'] = str(ID)
-			if Path(os.getcwd()+'/static/image/Carousel/'+'C'+str(ID)+'.png').exists():
-				carouselData['image'] = 'image/Carousel/'+'C'+str(ID)+'.png'
-			elif Path(os.getcwd()+'/static/image/Carousel/'+'C'+str(ID)+'.jpg').exists():
-				carouselData['image'] = 'image/Carousel/'+'C'+str(ID)+'.jpg'
+			if 'R' in adminInfo['carousel']:
+				carouselData = {}
+				carouselData['num'] = str(ID)
 
-			return render_template('adminForm.html',title='Carousel',type='carousel',data=carouselData)
-		elif arg == 'comment': 
-			commentData = db.exe_fetch(SQL['commentInfo'].format(ID=ID))
-	
-			return render_template('adminForm.html',title='Comment',type='comment',data=commentData)
+				if Path(os.getcwd()+'/static/image/Carousel/'+'C'+str(ID)+'.png').exists():
+					carouselData['image'] = 'image/Carousel/'+'C'+str(ID)+'.png'
+				elif Path(os.getcwd()+'/static/image/Carousel/'+'C'+str(ID)+'.jpg').exists():
+					carouselData['image'] = 'image/Carousel/'+'C'+str(ID)+'.jpg'
 
-		elif arg == 'news': 
-			pass
+				return render_template('adminForm.html',title='Carousel',type='carousel',data=carouselData,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
+		elif arg == 'comment':
+			if 'R' in adminInfo['comment']: 
+				commentData = db.exe_fetch(SQL['commentInfo'].format(ID=ID))
+		
+				return render_template('adminForm.html',title='Comment',type='comment',data=commentData,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)				
+
+		elif arg == 'news':
+			if 'R' in adminInfo['comment']: 
+				newsData = db.exe_fetch(SQL['newsInfo'].format(ID=ID))
+		
+				return render_template('adminForm.html',title='News',type='news',data=newsData,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
+		elif arg == 'admin':
+			if 'Super' in adminInfo['admin']: 
+				oneAdminData = db.exe_fetch(SQL['adminInfo_id'].format(id=ID))
+		
+				return render_template('adminForm.html',title='Admin',type='admin',data=oneAdminData,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 	else:
 		return redirect(url_for('login'))
 
@@ -759,7 +915,7 @@ def edit_client():
 			return redirect(url_for('admin_manage',arg='client'))
 		else:
 			message = 'You are not allow to edit.'
-			return render_template('back.html',title=Error,message=message)
+			return render_template('back.html',title='Error',message=message)
 
 @app.route('/edit_article', methods=['post'])
 def edit_article():
@@ -769,9 +925,9 @@ def edit_article():
 		if 'W' in adminInfo['article']:
 			articleID = request.form['articleID']
 			category = request.form['category']
-			title = request.form['title']
+			title = request.form['title'].replace('\'','\\\'').replace('\"','\\\"')
 			price = request.form['price']
-			description = request.form['description']
+			description = request.form['description'].replace('\'','\\\'').replace('\"','\\\"')
 			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
 			file = request.files['img']
 
@@ -787,7 +943,7 @@ def edit_article():
 			return redirect(url_for('admin_manage',arg='article'))
 		else:
 			message = 'You are not allow to edit.'
-			return render_template('back.html',title=Error,message=message)
+			return render_template('back.html',title='Error',message=message)
 
 
 @app.route('/edit_comment',methods=['post'])
@@ -798,13 +954,32 @@ def edit_comment():
 		if 'W' in adminInfo['article']:
 			commentID = request.form['commentID']
 			comment = request.form['comment'].replace('\'','\\\'').replace('\"','\\\"')
-			print(SQL['updateComment'].format(c=comment,ID=commentID))
+
 			db.exe_commit(SQL['updateComment'].format(c=comment,ID=commentID))
 
 			return redirect(url_for('admin_manage',arg='comment'))
 		else:
 			message = 'You are not allow to edit.'
-			return render_template('back.html',title=Error,message=message)
+			return render_template('back.html',title='Error',message=message)
+
+
+@app.route('/edit_news',methods=['post'])
+def edit_news():
+	if session.get('admin') != None:
+		admin = session['admin']
+		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
+		if 'W' in adminInfo['news']:
+			newsID = request.form['newsID']
+			newsType = request.form['type']
+			title = request.form['title'].replace('\'','\\\'').replace('\"','\\\"')
+			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
+
+			db.exe_commit(SQL['updateNews'].format(t=title,c=content,ID=newsID,type=newsType))
+
+			return redirect(url_for('admin_manage',arg='news'))
+		else:
+			message = 'You are not allow to edit.'
+			return render_template('back.html',title='Error',message=message)
 
 
 @app.route('/edit_carousel',methods=['post'])
@@ -819,13 +994,75 @@ def edit_carousel():
 			if file and allowed_file(file.filename):
 				filename = 'C' + str(num) + '.' + secure_filename(file.filename).split('.')[-1]
 				file.save(os.path.join(app.config['UPLOAD_CAROUSEL_FOLDER'], filename))
-				return render_template('admin_manage',arg='carousel')
+				return redirect(url_for('admin_manage',arg='carousel'))
 			else:
 				message = 'Invaild format of Image'
 				return render_template('back.html',title='Error',message=message)
 		else:
 			message = 'You are not allow to edit.'
 			return render_template('back.html',title='Error',message=message)
+
+@app.route('/newAdmin')
+def newAdmin():
+	if session.get('admin') != None:
+		admin = session['admin']
+		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
+		if 'Super' in adminInfo['admin']:
+			return render_template('adminForm.html',title='New Admin',type='newAdmin',adminData=adminInfo)
+		else:
+			message = 'You are not allow to edit.'
+			return render_template('back.html',title='Error',message=message)
+	else:
+		return redirect(url_for('login'))
+
+@app.route('/edit_admin', methods=['post'])
+def edit_admin():
+	if session.get('admin') != None:
+		admin = session['admin']
+		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
+		if 'Super' in adminInfo['admin']:
+			adminID = request.form['adminID']
+			account = request.form['account']
+			password = request.form['password']
+			client = request.form['client']
+			article = request.form['article']
+			comment = request.form['comment']
+			carousel = request.form['carousel']
+			news = request.form['news']
+			revenue = request.form['revenue']
+
+			db.exe_commit(SQL['updateAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,revenue=revenue,ID=adminID))
+
+			return redirect(url_for('admin_manage',arg='admin'))
+		else:
+			message = 'You are not allow to edit.'
+			return render_template('back.html',title='Error',message=message)
+	else:
+		return redirect(url_for('login'))
+
+@app.route('/newAdmin_create', methods=['post'])
+def newAdmin_create():
+	if session.get('admin') != None:
+		admin = session['admin']
+		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
+		if 'Super' in adminInfo['admin']:
+			account = request.form['account']
+			password = request.form['password']
+			client = request.form['client']
+			article = request.form['article']
+			comment = request.form['comment']
+			carousel = request.form['carousel']
+			news = request.form['news']
+			revenue = request.form['revenue']
+
+			db.exe_commit(SQL['newAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,r=revenue))
+
+			return redirect(url_for('admin_manage',arg='admin'))
+		else:
+			message = 'You are not allow to edit.'
+			return render_template('back.html',title='Error',message=message)
+	else:
+		return redirect(url_for('login'))
 
 @app.route('/admin_out')
 def admin_out():
@@ -834,6 +1071,21 @@ def admin_out():
 		return redirect(url_for('home'))
 	else:
 		return redirect(url_for('login'))
+###############################################################################################
+
+#Errorhandler
+###############################################################################################
+@app.errorhandler(404)
+def error404(e):
+	return redirect(url_for('home'))
+
+@app.errorhandler(405)
+def error405(e):
+	return redirect(url_for('home'))
+
+@app.errorhandler(500)
+def error500(e):
+	return redirect(url_for('home'))
 ###############################################################################################
 
 if __name__ == "__main__":

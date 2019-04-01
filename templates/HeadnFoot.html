@@ -38,7 +38,7 @@
             <a class="nav-link" href="{{url_for('edit')}}">Compose</a>
           </li>
           <li class="nav-item">
-            <form class="form-inline" action="{{url_for('search')}}">
+            <form class="form-inline" action="{{url_for('search',sort='newest')}}">
               <input name="q" class="form-control" type="text" placeholder="Search by Article Title" style="margin: 2px;background-color: #78C2AD;border-radius: 0px;color: white;" required>
               <button class="btn btn-secondary" type="submit" style="background-color: crimson; border-radius: 0px">Go</button>
             </form>
@@ -212,42 +212,40 @@
   <div class="col-sm-3" style="text-align: center;">
     <div style="font-size: 30px; padding-top: 20px">Contact us</div>
     <div style="width:100%;height: 65%;">
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px"><a href="#" style="color: white">Email</a></div>
+      <div style="font-size: 20px"><a href='#' style="color: white">Phone</a></div>
+      <div style="font-size: 20px"><a href='#' style="color: white">Facebook</a></div>
+      <div style="font-size: 20px"><a href='#' style="color: white">Twitter</a></div>
     </div>
     <div style="width:100%;height: 20%;text-align: left;margin-left: 25px;padding-bottom: 55px ">
-      <select class="form-control" style="width: 50%">
+      <select class="form-control" style="display:inline;width: 50%" disabled>
         <option>English</option>
       </select>
+      <span>Copyright@....</span>
     </div>
   </div>
   <div class="col-sm-3" style="text-align: center;">
     <div style="font-size: 30px; padding-top: 20px">About us</div>
     <div style="width:100%;height: 65%;">
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px"><a href="{{url_for('about')}}" style="color: white">CooKinGom</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('about')}}" style="color: white">Q&A</a></div>
     </div>
   </div>
   <div class="col-sm-3" style="text-align: center;">
-    <div style="font-size: 30px; padding-top: 20px">Information</div>
+    <div style="font-size: 30px; padding-top: 20px">Category</div>
     <div style="width:100%;height: 65%;">
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px"><a href="{{url_for('category',arg='chinese')}}" style="color: white">Chinese</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('category',arg='europe')}}" style="color: white">Europe</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('category',arg='Japanese')}}" style="color: white">Japanese</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('category',arg='other')}}" style="color: white">Other</a></div>
     </div>
   </div>
   <div class="col-sm-3" style="text-align: center;">
-    <div style="font-size: 30px; padding-top: 20px">New</div>
+    <div style="font-size: 30px; padding-top: 20px">News</div>
     <div style="width:100%;height: 65%;">
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
-      <div style="font-size: 20px">item</div>
+      <div style="font-size: 20px"><a href="{{url_for('news',arg='all')}}" style="color: white">All</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('news',arg='event')}}" style="color: white">Event</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('news',arg='system')}}" style="color: white">System</a></div>
     </div>
   </div>
   </div>
