@@ -442,7 +442,7 @@ def purchase():
 			else:
 				total = todayRevenue['revenue']
 				total += price
-				db.exe_commit(SQL['updateRevenue'].format(r=total))
+				db.exe_commit(SQL['updateRevenue'].format(r=total,date=today))
 
 		db.exe_commit(SQL['cart_delAll'].format(clientID=user))
 

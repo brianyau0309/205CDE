@@ -98,7 +98,7 @@ SELECT * FROM client
 SELECT * FROM article
 ''',
 	'allRevenue':'''
-SELECT * FROM revenue
+SELECT * FROM revenue ORDER BY `date` DESC
 ''',
 	'allComment':'''
 SELECT * FROM comment
@@ -143,7 +143,7 @@ SELECT * FROM news WHERE newsID = {ID}
 UPDATE news SET type = '{type}',title = '{t}', content = '{c}' WHERE newsID = {ID}
 ''',
 	'updateRevenue':'''
-UPDATE revenue SET `revenue` = {r}
+UPDATE revenue SET `revenue` = {r} WHERE `date` = '{date}'
 ''',
 	'updateAdmin':'''
 UPDATE admin SET account = '{ac}', password = '{p}', client = '{client}', article = '{article}', comment = '{comment}', carousel = '{carousel}', news = '{news}', revenue = '{revenue}' WHERE adminID = {ID}
