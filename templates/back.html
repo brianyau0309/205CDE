@@ -3,7 +3,9 @@
 <head>
     <title>{{title}} - CooKinGdom</title>
     <script type="text/javascript">
+    	{% if message %}
         window.alert('{{ message }}')
+        {% endif %}
         window.location.href = document.referrer
     </script>
 </head>

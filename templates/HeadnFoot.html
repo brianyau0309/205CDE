@@ -164,10 +164,11 @@
       </div>
       <div class="modal-body" style="background-color: white;">
 
-        {% if cart == 'Nothing' %}
+        {% if cart[0] == 'Nothing' %}
         <div style="width: 100%;text-align: center;">Nothing in Cart</div>
         {% else %}
-        {% for i in cart %}
+        <div style="width: 100%;text-align: left;border-bottom: 2px solid gray">Total Price: <b>${{ cart[1] }}</b></div>
+        {% for i in cart[0] %}
           <div style="width: 100%;height: 150px;border: 5px solid white;">
             <div style="display: inline;width: 40%;height: 100%;float: left;">
               <img src="{{url_for('static', filename=i.image)}}" style="width: 100%;height: 100%;border-right: 5px solid #78C2AD;">
@@ -228,7 +229,7 @@
     <div style="font-size: 30px; padding-top: 20px">About us</div>
     <div style="width:100%;height: 65%;">
       <div style="font-size: 20px"><a href="{{url_for('about')}}" style="color: white">CooKinGom</a></div>
-      <div style="font-size: 20px"><a href="{{url_for('about')}}" style="color: white">Q&A</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('about')}}#Q&A" style="color: white">Q&A</a></div>
     </div>
   </div>
   <div class="col-sm-3" style="text-align: center;">
@@ -236,7 +237,7 @@
     <div style="width:100%;height: 65%;">
       <div style="font-size: 20px"><a href="{{url_for('category',arg='chinese')}}" style="color: white">Chinese</a></div>
       <div style="font-size: 20px"><a href="{{url_for('category',arg='europe')}}" style="color: white">Europe</a></div>
-      <div style="font-size: 20px"><a href="{{url_for('category',arg='Japanese')}}" style="color: white">Japanese</a></div>
+      <div style="font-size: 20px"><a href="{{url_for('category',arg='japanese')}}" style="color: white">Japanese</a></div>
       <div style="font-size: 20px"><a href="{{url_for('category',arg='other')}}" style="color: white">Other</a></div>
     </div>
   </div>

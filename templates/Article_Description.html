@@ -84,8 +84,14 @@
                 <img src="{{url_for('static',filename=c.icon)}}" style="width:100%;height: 100%">
             </div>
             <div style="font-size: 15px;text-align: center">{{c.authorName}}</div>
-            <div style="font-size: 15px;text-align: center">Client ID: {{c.author}}</div>
-            
+            <div style="font-size: 15px;text-align: center">Client ID: {{c.author}}
+                {% if session.get('clientID') == c.author %}
+                <form action="{{url_for('disable_own_comment')}}" method="post">
+                    <input type="hidden" name="commentID" value="{{c.author}}">
+                    <button type="submit" style="float: right;border: 1px solid gray">Delete</button>
+                </form>
+                {%endif%}
+            </div>    
         </div>
         <div style="float: right;width: 80%;height: 100%; background-color: #78C2AD">
             <div style="height: 10%;background-color: #78C2AD;font-size:15px">

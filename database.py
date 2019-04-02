@@ -40,6 +40,9 @@ SELECT * FROM article WHERE articleID = '{ID}'
 	'articleInfo_owner':'''
 SELECT * FROM article WHERE owner = '{ID}' ORDER BY `date` DESC
 ''',
+	'recordInfo':'''
+SELECT * FROM record WHERE recordID = {ID}
+''',
 	'record_owner':'''
 SELECT `recordID`,`articleID`,`title`,record.`date`,`price`,`description`,`content`,`sales`,`category` FROM record LEFT JOIN article ON record.article = article.articleID WHERE record.owner = {ID} ORDER BY `date` DESC
 ''',
@@ -47,7 +50,7 @@ SELECT `recordID`,`articleID`,`title`,record.`date`,`price`,`description`,`conte
 SELECT `inCartID`,`articleID`, article.`owner`,`title`,`price`,`category` FROM cart LEFT JOIN article ON cart.article = article.articleID WHERE cart.owner = {ID}
 ''',
 	'hot_item':'''
-SELECT * FROM article ORDER BY `sales` DESC LIMIT 8
+SELECT * FROM article WHERE state = 'able' ORDER BY `sales` DESC LIMIT 8
 ''',
 	'checkRecord':'''
 SELECT * FROM record WHERE owner = {clientID} and article = {articleID}
@@ -71,19 +74,19 @@ DELETE FROM cart WHERE `owner` = {clientID}
 SELECT * FROM cart WHERE `owner` = {clientID}
 ''',
 	'categoryResult':'''
-SELECT * FROM article WHERE `category` = '{c}' ORDER BY `date` DESC
+SELECT * FROM article WHERE `category` = '{c}' and state = 'able' ORDER BY `date` DESC
 ''',
 	'searching_title':'''
-SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `date` DESC
+SELECT * FROM article WHERE `title` LIKE '%{q}%' and state = 'able' ORDER BY `date` DESC
 ''',
 	'searching_title_byPriceL2H':'''
-SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `price` ASC
+SELECT * FROM article WHERE `title` LIKE '%{q}%' and state = 'able' ORDER BY `price` ASC
 ''',
 	'searching_title_byPriceH2L':'''
-SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `price` DESC
+SELECT * FROM article WHERE `title` LIKE '%{q}%' and state = 'able' ORDER BY `price` DESC
 ''',
 	'searching_title_bySales':'''
-SELECT * FROM article WHERE `title` LIKE '%{q}%' ORDER BY `sales` ASC
+SELECT * FROM article WHERE `title` LIKE '%{q}%' and state = 'able' ORDER BY `sales` ASC
 ''',
 	'adminInfo_ac':'''
 SELECT adminID,account,password FROM admin WHERE account = '{ac}'
@@ -107,21 +110,27 @@ SELECT * FROM comment
 SELECT * FROM news
 ''',
 	'allNews_desc':'''
-SELECT * FROM news ORDER BY `date` DESC
+SELECT * FROM news WHERE state = 'able' ORDER BY `date` DESC
 ''',
 	'allNews_desc_event':'''
-SELECT * FROM news WHERE type = 'event' ORDER BY `date` DESC
+SELECT * FROM news WHERE type = 'event' and state = 'able' ORDER BY `date` DESC
 ''',
 	'allNews_desc_system':'''
-SELECT * FROM news WHERE type = 'system' ORDER BY `date` DESC
+SELECT * FROM news WHERE type = 'system' and state = 'able' ORDER BY `date` DESC
+''',
+	'allRecord':'''
+SELECT * FROM record
 ''',
 	'allAdmin':'''
 SELECT * FROM admin
 ''',
 	'updateClient':'''
-UPDATE client SET email = '{e}', nickname = '{n}', password = '{p}' WHERE clientID = '{ID}'
+UPDATE client SET email = '{e}', nickname = '{n}', password = '{p}', state = '{s}' WHERE clientID = '{ID}'
 ''',
 	'updateArticle':'''
+UPDATE article SET category = '{cate}',title = '{t}',price = '{p}',description = "{d}",content = "{cont}", state = '{s}' WHERE articleID = {ID}
+''',
+	'updateArticle_owner':'''
 UPDATE article SET category = '{cate}',title = '{t}',price = '{p}',description = "{d}",content = "{cont}" WHERE articleID = {ID}
 ''',
 	'revenueInfo':'''
@@ -140,7 +149,7 @@ INSERT INTO admin (`account`,`password`,`client`,`article`,`comment`,`carousel`,
 SELECT * FROM news WHERE newsID = {ID}
 ''',
 	'updateNews':'''
-UPDATE news SET type = '{type}',title = '{t}', content = '{c}' WHERE newsID = {ID}
+UPDATE news SET type = '{type}',title = '{t}', content = '{c}', state = '{s}' WHERE newsID = {ID}
 ''',
 	'updateRevenue':'''
 UPDATE revenue SET `revenue` = {r} WHERE `date` = '{date}'
@@ -154,6 +163,9 @@ INSERT INTO comment (`article`,`author`,`comment`,`date`) VALUE ({a},{o},"{c}","
 	'getComment':'''
 SELECT * FROM comment WHERE article = {ID} ORDER BY `date` DESC
 ''',
+	'getComment_able':'''
+SELECT * FROM comment WHERE article = {ID} and state = 'able' ORDER BY `date` DESC
+''',
 	'commentInfo':'''
 SELECT * FROM comment WHERE commentID = {ID}
 ''',
@@ -161,6 +173,15 @@ SELECT * FROM comment WHERE commentID = {ID}
 UPDATE article SET `sales` = {s} WHERE `articleID` = {ID}
 ''',
 	'updateComment':'''
-UPDATE comment SET `comment` = '{c}' WHERE `commentID` = {ID}
+UPDATE comment SET `comment` = '{c}', state = '{s}' WHERE `commentID` = {ID}
+''',
+	'disable_own_comment':'''
+UPDATE comment SET state = 'disable' WHERE `commentID` = {ID}
+''',
+	'disable_own_article':'''
+UPDATE article SET state = 'disable' WHERE `articleID` = {ID}
+''',
+	'clearAllCart':'''
+DELETE FROM cart WHERE `article` = {ID}
 '''
 }

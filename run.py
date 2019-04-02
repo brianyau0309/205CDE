@@ -3,6 +3,7 @@
 #setting
 ###############################################################################################
 from flask import Flask, render_template, redirect, url_for, request, session, flash
+from flask_mail import Mail, Message
 from database import connection, SQL
 from pathlib import Path
 from werkzeug.utils import secure_filename
@@ -18,6 +19,15 @@ app.config['SECRET_KEY'] = os.urandom(24)
 app.config['UPLOAD_ICON_FOLDER'] = UPLOAD_ICON_FOLDER
 app.config['UPLOAD_ARTICLE_FOLDER'] = UPLOAD_ARTICLE_FOLDER
 app.config['UPLOAD_CAROUSEL_FOLDER'] = UPLOAD_CAROUSEL_FOLDER
+
+mail = Mail(app)
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'cookingdom2019@gmail.com'
+app.config['MAIL_PASSWORD'] = 'AaA123123'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
 
 db = connection()
 ###############################################################################################
@@ -47,6 +57,7 @@ def get_cart(): #get user by session
 	user = session.get('clientID')
 	if user != None:
 		items = db.exe_fetch(SQL["cart_owner"].format(ID=user), 'all')
+		total = 0
 		for i in items:
 			ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=i['owner']))['nickname']
 			i['author'] = ownerName
@@ -56,10 +67,11 @@ def get_cart(): #get user by session
 				i['image'] = 'image/article/'+str(i['articleID'])+'.jpg'
 			else:
 				i['image'] = 'image/article/default.png'
+			total += i['price']
 
 		if items == ():
 			items = 'Nothing'
-		return items
+		return [items,total]
 	else:
 		return 'Guest'
 ###############################################################################################
@@ -69,6 +81,7 @@ def get_cart(): #get user by session
 @app.route('/index')
 @app.route('/')
 def home():
+	print(get_cart())
 	items = db.exe_fetch(SQL['hot_item'],'all')
 	for i in items:
 		ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=i['owner']))['nickname']
@@ -114,12 +127,31 @@ def login_done():
 	if (checkEmail == None):
 		flash("Invaild")
 		return redirect(url_for('login'))
+	elif  (checkEmail.get('state') != 'able'):
+		message = 'Blocked Account'
+		return render_template('back.html',title='Error',message=message)
 	elif  (checkEmail.get('password') != password):
 		flash("Invaild")
 		return redirect(url_for('login'))
 	else:
 		session['clientID'] = checkEmail['clientID']
 		return redirect(url_for('home'))
+
+
+@app.route('/forgetpassword', methods=['post'])
+def forgetpassword():
+	email = request.form['forget_email']
+	checkEmail = db.exe_fetch(SQL['clientInfo_email'].format(email=email))
+	if (checkEmail == None):
+		message = 'Email Not Find'
+		return render_template('back.html',title='Error',message=message)
+	else:
+		msg = Message('CooKinGdom - Forget Password',sender = 'cookingdom@gmail.com',recipients=[email])
+		msg.body = "Here is your new password: " + checkEmail.get('password')
+		mail.send(msg)
+
+		message = 'Success! Check You email.'
+		return render_template('back.html',title='Success',message=message)
 
 
 @app.route('/logout')
@@ -161,9 +193,8 @@ def signup_done():
 			if checkEmail == None:
 				db.exe_commit(SQL['signup'].format(e=email,n=name,p=password))
 				userInfo = db.exe_fetch(SQL['clientInfo_email'].format(email=email))
-				icon = url_for('static',filename=userInfo['icon'])
 
-				return render_template('SignUp_Done.html',usericon=icon,userID=userInfo['clientID'],userName=userInfo['nickname'],userEmail=userInfo['email'],userPassword=userInfo['password'])
+				return render_template('SignUp_Done.html',userID=userInfo['clientID'],userName=userInfo['nickname'],userEmail=userInfo['email'],userPassword=userInfo['password'])
 			else:
 				flash('Used email','email')
 				return redirect(url_for('signup'))
@@ -203,7 +234,7 @@ def myarticle():
 			else:
 				article['image'] = 'image/article/default.png'
 		
-		return render_template('list_article.html',pageTitle='My Article',cart=get_cart(),userInfo=get_user(),articles=articles)
+		return render_template('list_article.html',pageTitle='My Article',cart=get_cart(),userInfo=get_user(),articles=articles,My='Yes')
 	else:
 		return redirect(url_for('login'))
 ###############################################################################################
@@ -253,6 +284,9 @@ def edit_own_article(aID):
 		user = session['clientID']
 		a = db.exe_fetch(SQL['articleInfo'].format(ID=aID))
 		author = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['clientID']
+		if a['state'] == 'disable':
+			message = 'Blocked Article'
+			return render_template('back.html',title='Error',message=message)
 		if user == author:
 			return render_template('userEdit.html',data=a,articleID=aID)
 		else: 
@@ -276,7 +310,7 @@ def own_edit_done():
 			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
 			category = request.form['category'].lower()
 
-			db.exe_commit(SQL['updateArticle'].format(cate=category,t=title,p=price,d=description,cont=content,ID=articleID))
+			db.exe_commit(SQL['updateArticle_owner'].format(cate=category,t=title,p=price,d=description,cont=content,ID=articleID))
 			if file and allowed_file(file.filename):
 				filename = str(articleID) + '.' + secure_filename(file.filename).split('.')[-1]
 				file.save(os.path.join(app.config['UPLOAD_ARTICLE_FOLDER'], filename))
@@ -302,23 +336,27 @@ def own_edit_done():
 @app.route('/article_description/<path:aID>/')
 def article_description(aID):
 	a = db.exe_fetch(SQL['articleInfo'].format(ID=aID))
-	ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['nickname']
-	comment = db.exe_fetch(SQL['getComment'].format(ID=aID),'all')
-	counter = len(comment)
-	for i in comment:
-		authorInfo = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=i['author']))
-		i['num'] = '#'+str(counter)
-		i['authorName'] = authorInfo['nickname']
-		i['comment'] = i['comment'].replace('\n','<br>')
-		if Path(os.getcwd()+'/static/image/icon/'+str(i['author'])+'.png').exists():
-			i['icon'] = 'image/icon/'+str(i['author'])+'.png'
-		elif Path(os.getcwd()+'/static/image/icon/'+str(i['author'])+'.jpg').exists():
-			i['icon'] = 'image/icon/'+str(i['author'])+'.jpg'
-		else:
-			i['icon'] = 'image/icon/default.png'
-		counter -= 1
+	if a.get('state') == 'able':
+		ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['nickname']
+		comment = db.exe_fetch(SQL['getComment_able'].format(ID=aID),'all')
+		counter = len(comment)
+		for i in comment:
+			authorInfo = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=i['author']))
+			i['num'] = '#'+str(counter)
+			i['authorName'] = authorInfo['nickname']
+			i['comment'] = i['comment'].replace('\n','<br>')
+			if Path(os.getcwd()+'/static/image/icon/'+str(i['author'])+'.png').exists():
+				i['icon'] = 'image/icon/'+str(i['author'])+'.png'
+			elif Path(os.getcwd()+'/static/image/icon/'+str(i['author'])+'.jpg').exists():
+				i['icon'] = 'image/icon/'+str(i['author'])+'.jpg'
+			else:
+				i['icon'] = 'image/icon/default.png'
+			counter -= 1
 
-	return render_template('Article_Description.html', userInfo=get_user(),cart=get_cart(),title=a['title'], price=a['price'], description=a['description'].replace('\n','<br>'), date=a['date'], name=ownerName, articleID=a['articleID'],comment=comment)
+		return render_template('Article_Description.html', userInfo=get_user(),cart=get_cart(),title=a['title'], price=a['price'], description=a['description'].replace('\n','<br>'), date=a['date'], name=ownerName, articleID=a['articleID'],comment=comment)
+	else:
+		message = 'Blocked Article'
+		return render_template('back.html',title='Erroe',message=message)
 
 @app.route('/comment', methods=['post'])
 def comment():
@@ -336,6 +374,23 @@ def comment():
 	else:
 		return redirect(url_for('login'))
 
+@app.route('/disable_own_comment', methods=['post'])
+def disable_own_comment():
+	if session.get('clientID') != None:
+		user = session['clientID']
+		commentID = request.form['commentID']
+		author = db.exe_fetch(SQL['commentInfo'].format(ID=commentID))['author']
+		if user == author:
+			db.exe_commit(SQL['disable_own_comment'].format(ID=commentID))
+			message = 'Delete Success!'
+			return render_template('back.html', title='Success', message=message)
+		else:
+			message = 'Error'
+			return render_template('back.html', title='Error', message=message)
+
+	else:
+		return redirect(url_for('login'))
+
 @app.route('/article/<path:aID>/')
 def article(aID):
 	if session.get('clientID') != None:
@@ -343,6 +398,10 @@ def article(aID):
 		bought = db.exe_fetch(SQL['checkRecord'].format(clientID=user,articleID=aID))
 		a = db.exe_fetch(SQL['articleInfo'].format(ID=aID))
 		author = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['clientID']
+		if a.get('state') == 'disable':
+			message = 'Blocked Article'
+			return render_template('back.html',title='Erroe',message=message)
+
 		if bought != None or user == author:
 			ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['nickname']
 			return render_template('Article.html', userInfo=get_user(),cart=get_cart(),title=a['title'], content=a['content'].replace('\n','<br>'), date=a['date'], name=ownerName,articleID=aID,owner=(user==author))
@@ -352,102 +411,20 @@ def article(aID):
 	else:
 		return redirect(url_for('login'))
 
-
-@app.route('/addtocart', methods=['post'])
-def addtocart():
+@app.route('/disable_own_article', methods=['post'])
+def disable_own_article():
 	if session.get('clientID') != None:
 		user = session['clientID']
-		article = request.form['articleID']
-		articleOwner =  db.exe_fetch(SQL['articleInfo'].format(ID=article))['owner']
-		inCart = db.exe_fetch(SQL['checkCart'].format(articleID=article, clientID=user))
-		inRecord = db.exe_fetch(SQL['checkRecord'].format(articleID=article, clientID=user))
-		if articleOwner == user:
-			message = 'It is your article!'
-			return render_template('back.html', title='Error', message=message)
-		elif inCart != None:
-			message = 'It is already in your cart!'
-			return render_template('back.html', title='Error', message=message)
-		elif inRecord != None:
-			message = 'Your have already bought this article!'
-			return render_template('back.html', title='Error', message=message)
+		articleID = request.form['articleID']
+		author = db.exe_fetch(SQL['articleInfo'].format(ID=articleID))['owner']
+		if user == author:
+			db.exe_commit(SQL['disable_own_article'].format(ID=articleID))
+			db.exe_commit(SQL['clearAllCart'].format(ID=articleID))
+			return render_template('back.html', title='Success')
 		else:
-			db.exe_commit(SQL['add2cart'].format(articleID=article, clientID=user))
-			message = 'Your have successfully add this article to cart!'
-			return render_template('back.html', title='Success', message=message)
-	else:
-		return redirect(url_for('login'))
-
-
-@app.route('/buyone', methods=['post'])
-def buyone():
-	if session.get('clientID') != None:
-		user = session['clientID']
-		article = request.form['articleID']
-		articleOwner =  db.exe_fetch(SQL['articleInfo'].format(ID=article))['owner']
-		inRecord = db.exe_fetch(SQL['checkRecord'].format(articleID=article, clientID=user))
-		date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-		if articleOwner == user:
-			message = 'It is your article!'
+			message = 'Error'
 			return render_template('back.html', title='Error', message=message)
-		elif inRecord != None:
-			message = 'Your have already bought this article!'
-			return render_template('back.html', title='Error', message=message)
-		else:
-			db.exe_commit(SQL['buyone'].format(articleID=article, clientID=user, date=date))
-			db.exe_commit(SQL['cart_del'].format(articleID=article,clientID=user))
 
-			sales = db.exe_fetch(SQL['articleInfo'].format(ID=article))['sales']
-			sales += 1
-			db.exe_commit(SQL['updateSales'].format(s=sales,ID=article))
-
-			flash('Thank you for your patronage!','thank')
-			return redirect(url_for('article', aID=article))
-	else:
-		return redirect(url_for('login'))
-
-
-@app.route('/cart_del', methods=['post'])
-def cart_del():
-	if session.get('clientID') != None:
-		user = session['clientID']
-		article = request.form['article']
-			
-		db.exe_commit(SQL['cart_del'].format(articleID=article,clientID=user))
-		flash('opencart','opencart')
-		return render_template('back.html',message='Cancel Success',title='Success')
-
-	else:
-		return redirect(url_for('login'))
-
-@app.route('/purchase', methods=['post'])
-def purchase():
-	if session.get('clientID') != None:
-		user = session['clientID']
-		cartInfo = db.exe_fetch(SQL['cartInfo'].format(clientID=user),'all')
-		date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-		today = datetime.datetime.today().strftime("%Y-%m-%d")
-
-		for i in cartInfo:
-			db.exe_commit(SQL['buyone'].format(articleID=i['article'],clientID=user,date=date))
-
-			sales = db.exe_fetch(SQL['articleInfo'].format(ID=i['article']))['sales']
-			sales += 1
-			db.exe_commit(SQL['updateSales'].format(s=sales,ID=i['article']))
-
-			price = db.exe_fetch(SQL['articleInfo'].format(ID=i['article']))['price']
-			todayRevenue = db.exe_fetch(SQL['revenueInfo'].format(date=today))
-			if todayRevenue == None:
-				db.exe_commit(SQL['newRevenue'].format(d=today,r=price))
-			else:
-				total = todayRevenue['revenue']
-				total += price
-				db.exe_commit(SQL['updateRevenue'].format(r=total,date=today))
-
-		db.exe_commit(SQL['cart_delAll'].format(clientID=user))
-
-		message = 'Purchase Success!'
-		return render_template('back.html', title='Success', message=message)
 	else:
 		return redirect(url_for('login'))
 
@@ -482,6 +459,115 @@ def changePassword():
 		db.exe_commit(SQL['changePassword'].format(p=new,id=user))
 		flash('passwordSuccess', 'passwordSuccess')
 		return redirect(url_for('home'))
+	else:
+		return redirect(url_for('login'))
+
+@app.route('/addtocart', methods=['post'])
+def addtocart():
+	if session.get('clientID') != None:
+		user = session['clientID']
+		article = request.form['articleID']
+		articleOwner =  db.exe_fetch(SQL['articleInfo'].format(ID=article))['owner']
+		inCart = db.exe_fetch(SQL['checkCart'].format(articleID=article, clientID=user))
+		inRecord = db.exe_fetch(SQL['checkRecord'].format(articleID=article, clientID=user))
+		if articleOwner == user:
+			message = 'It is your article!'
+			return render_template('back.html', title='Error', message=message)
+		elif inCart != None:
+			message = 'It is already in your cart!'
+			return render_template('back.html', title='Error', message=message)
+		elif inRecord != None:
+			message = 'Your have already bought this article!'
+			return render_template('back.html', title='Error', message=message)
+		else:
+			db.exe_commit(SQL['add2cart'].format(articleID=article, clientID=user))
+			message = 'Your have successfully add this article to cart!'
+			return render_template('back.html', title='Success', message=message)
+	else:
+		return redirect(url_for('login'))
+
+
+@app.route('/buyone', methods=['post'])
+def buyone():
+	if session.get('clientID') != None:
+		user = session['clientID']
+		article = request.form['articleID']
+		articleOwner =  db.exe_fetch(SQL['articleInfo'].format(ID=article))['owner']
+		inRecord = db.exe_fetch(SQL['checkRecord'].format(articleID=article, clientID=user))
+		date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+		today = datetime.datetime.today().strftime("%Y-%m-%d")
+		processingFee = 0.3
+
+		if articleOwner == user:
+			message = 'It is your article!'
+			return render_template('back.html', title='Error', message=message)
+		elif inRecord != None:
+			message = 'Your have already bought this article!'
+			return render_template('back.html', title='Error', message=message)
+		else:
+			db.exe_commit(SQL['buyone'].format(articleID=article, clientID=user, date=date))
+			db.exe_commit(SQL['cart_del'].format(articleID=article,clientID=user))
+
+			sales = db.exe_fetch(SQL['articleInfo'].format(ID=article))['sales']
+			sales += 1
+			db.exe_commit(SQL['updateSales'].format(s=sales,ID=article))
+
+			price = db.exe_fetch(SQL['articleInfo'].format(ID=article))['price']
+			todayRevenue = db.exe_fetch(SQL['revenueInfo'].format(date=today))
+			if todayRevenue == None:
+				db.exe_commit(SQL['newRevenue'].format(d=today,r=(round(price*processingFee))))
+			else:
+				total = todayRevenue['revenue']
+				total += round(price*processingFee)
+				db.exe_commit(SQL['updateRevenue'].format(r=total,date=today))
+
+			flash('Thank you for your patronage!','thank')
+			return redirect(url_for('article', aID=article))
+	else:
+		return redirect(url_for('login'))
+
+@app.route('/cart_del', methods=['post'])
+def cart_del():
+	if session.get('clientID') != None:
+		user = session['clientID']
+		article = request.form['article']
+			
+		db.exe_commit(SQL['cart_del'].format(articleID=article,clientID=user))
+		flash('opencart','opencart')
+		return render_template('back.html',message='Cancel Success',title='Success')
+
+	else:
+		return redirect(url_for('login'))
+
+@app.route('/purchase', methods=['post'])
+def purchase():
+	if session.get('clientID') != None:
+		user = session['clientID']
+		cartInfo = db.exe_fetch(SQL['cartInfo'].format(clientID=user),'all')
+		date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+		today = datetime.datetime.today().strftime("%Y-%m-%d")
+		processingFee = 0.3
+
+		for i in cartInfo:
+			db.exe_commit(SQL['buyone'].format(articleID=i['article'],clientID=user,date=date))
+
+			sales = db.exe_fetch(SQL['articleInfo'].format(ID=i['article']))['sales']
+			sales += 1
+			db.exe_commit(SQL['updateSales'].format(s=sales,ID=i['article']))
+
+			price = db.exe_fetch(SQL['articleInfo'].format(ID=i['article']))['price']
+			todayRevenue = db.exe_fetch(SQL['revenueInfo'].format(date=today))
+			if todayRevenue == None:
+				db.exe_commit(SQL['newRevenue'].format(d=today,r=(round(price*processingFee))))
+			else:
+				total = todayRevenue['revenue']
+				total += round(price*processingFee)
+				db.exe_commit(SQL['updateRevenue'].format(r=total,date=today))
+
+		db.exe_commit(SQL['cart_delAll'].format(clientID=user))
+
+		message = 'Purchase Success!'
+		return render_template('back.html', title='Success', message=message)
 	else:
 		return redirect(url_for('login'))
 ###############################################################################################
@@ -663,6 +749,10 @@ def news(arg):
 @app.route('/news_content/<path:nID>')
 def news_content(nID):
 	news = db.exe_fetch(SQL['newsInfo'].format(ID=nID))
+	if news['state'] == 'disable':
+		message = 'Blocked News'
+		return render_template('back.html',title='Error',message=message)
+
 	news['content'] = news['content'].replace('\n','<br>')
 	return render_template('News_content.html',news=news)
 
@@ -672,7 +762,7 @@ def composeNews():
 		admin = session['admin']
 		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
 		if 'W' in adminInfo['article']:
-			return render_template('adminForm.html',title='Compose News',type='composeNews')
+			return render_template('adminForm.html',title='Compose News',type='composeNews',adminData=adminInfo)
 		else:
 			message = 'You are not allow to edit.'
 			return render_template('back.html',title='Error',message=message)
@@ -719,7 +809,7 @@ def admin_manage(arg):
 			if 'R' in adminInfo['client']:
 				allClient = db.exe_fetch(SQL['allClient'],'all')
 				result = len(allClient)
-				th = ['clientID','nickname','email','password']
+				th = ['clientID','nickname','email','password','state']
 				for i in allClient:
 					i['url'] = url_for('admin_edit',arg='client',ID=i['clientID'])
 
@@ -732,7 +822,7 @@ def admin_manage(arg):
 			if 'R' in adminInfo['article']:
 				allArticle = db.exe_fetch(SQL['allArticle'],'all')
 				result = len(allArticle)
-				th = ['articleID','category','owner','title','price','sales','date']
+				th = ['articleID','category','owner','title','price','sales','date','state']
 				for i in allArticle:
 					i['url'] = url_for('admin_edit',arg='article',ID=i['articleID'])
 
@@ -771,7 +861,7 @@ def admin_manage(arg):
 				allComment = db.exe_fetch(SQL['allComment'],'all')
 				maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
 				result = len(allComment)
-				th = ['commentID','article','author','date']
+				th = ['commentID','article','author','date','state']
 				for i in allComment:
 					i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
 
@@ -786,7 +876,7 @@ def admin_manage(arg):
 				maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
 				searchComment = db.exe_fetch(SQL['getComment'].format(ID=articleID),'all')
 				result = len(searchComment)
-				th = ['commentID','article','author','date']
+				th = ['commentID','article','author','date','state']
 				for i in searchComment:
 					i['url'] = url_for('admin_edit',arg='comment',ID=i['commentID'])
 
@@ -799,11 +889,24 @@ def admin_manage(arg):
 			if 'R' in adminInfo['news']: 
 				allNews = db.exe_fetch(SQL['allNews'],'all')
 				result = len(allNews)
-				th = ['newsID', 'type','title','author','date']
+				th = ['newsID', 'type','title','author','date','state']
 				for i in allNews:
 					i['url'] = url_for('admin_edit',arg='news',ID=i['newsID'])
 
 				return render_template('adminTable.html',title='News',tablehead=th,newsData=allNews,result=result,compose='Yes',adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
+		elif arg == 'record':
+			if 'R' in adminInfo['record']: 
+				allRecord = db.exe_fetch(SQL['allRecord'],'all')
+				result = len(allRecord)
+				th = ['recordID','article','owner','date']
+				for i in allRecord:
+					i['url'] = url_for('admin_edit',arg='record',ID=i['recordID'])
+
+				return render_template('adminTable.html',title='Record',tablehead=th,recordData=allRecord,result=result,adminData=adminInfo)
 			else:
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
@@ -887,6 +990,15 @@ def admin_edit(arg,ID):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
+		elif arg == 'record':
+			if 'R' in adminInfo['comment']: 
+				recordData = db.exe_fetch(SQL['recordInfo'].format(ID=ID))
+		
+				return render_template('adminForm.html',title='record',type='record',data=recordData,adminData=adminInfo)
+			else:
+				message = 'You are not allow to read.'
+				return render_template('back.html',title='Error',message=message)
+
 		elif arg == 'admin':
 			if 'Super' in adminInfo['admin']: 
 				oneAdminData = db.exe_fetch(SQL['adminInfo_id'].format(id=ID))
@@ -909,8 +1021,9 @@ def edit_client():
 			nickname = request.form['name']
 			email = request.form['email']
 			password = request.form['password']
+			state = request.form['state']
 
-			db.exe_commit(SQL['updateClient'].format(e=email,n=nickname,p=password,ID=clientID))
+			db.exe_commit(SQL['updateClient'].format(e=email,n=nickname,p=password,s=state,ID=clientID))
 
 			return redirect(url_for('admin_manage',arg='client'))
 		else:
@@ -929,16 +1042,21 @@ def edit_article():
 			price = request.form['price']
 			description = request.form['description'].replace('\'','\\\'').replace('\"','\\\"')
 			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
+			state = request.form['state']
 			file = request.files['img']
 
 			if file and allowed_file(file.filename):
 				filename = str(articleID) + '.' + secure_filename(file.filename).split('.')[-1]
 				file.save(os.path.join(app.config['UPLOAD_ARTICLE_FOLDER'], filename))
+			elif file.filename == '':
+				pass
 			else:
 				message = 'Invaild format of Image'
 				return render_template('back.html',title='Error',message=message)
 			
-			db.exe_commit(SQL['updateArticle'].format(cate=category,t=title,p=price,d=description,cont=content,ID=articleID))
+			db.exe_commit(SQL['updateArticle'].format(cate=category,t=title,p=price,d=description,cont=content,s=state,ID=articleID))
+			if state == 'disable':
+				db.exe_commit(SQL['clearAllCart'].format(ID=articleID))
 
 			return redirect(url_for('admin_manage',arg='article'))
 		else:
@@ -954,8 +1072,9 @@ def edit_comment():
 		if 'W' in adminInfo['article']:
 			commentID = request.form['commentID']
 			comment = request.form['comment'].replace('\'','\\\'').replace('\"','\\\"')
+			state = request.form['state']
 
-			db.exe_commit(SQL['updateComment'].format(c=comment,ID=commentID))
+			db.exe_commit(SQL['updateComment'].format(c=comment,s=state,ID=commentID))
 
 			return redirect(url_for('admin_manage',arg='comment'))
 		else:
@@ -973,8 +1092,9 @@ def edit_news():
 			newsType = request.form['type']
 			title = request.form['title'].replace('\'','\\\'').replace('\"','\\\"')
 			content = request.form['content'].replace('\'','\\\'').replace('\"','\\\"')
+			state = request.form['state']
 
-			db.exe_commit(SQL['updateNews'].format(t=title,c=content,ID=newsID,type=newsType))
+			db.exe_commit(SQL['updateNews'].format(t=title,c=content,type=newsType,s=state,ID=newsID))
 
 			return redirect(url_for('admin_manage',arg='news'))
 		else:
@@ -995,6 +1115,8 @@ def edit_carousel():
 				filename = 'C' + str(num) + '.' + secure_filename(file.filename).split('.')[-1]
 				file.save(os.path.join(app.config['UPLOAD_CAROUSEL_FOLDER'], filename))
 				return redirect(url_for('admin_manage',arg='carousel'))
+			elif file.filename == '':
+				pass
 			else:
 				message = 'Invaild format of Image'
 				return render_template('back.html',title='Error',message=message)
@@ -1031,7 +1153,11 @@ def edit_admin():
 			news = request.form['news']
 			revenue = request.form['revenue']
 
-			db.exe_commit(SQL['updateAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,revenue=revenue,ID=adminID))
+			if '@' in account:
+				db.exe_commit(SQL['updateAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,revenue=revenue,ID=adminID))
+			else:
+				message = "'@' should not be in 'account'"
+				return render_template('back.html',title='Error',message=message)
 
 			return redirect(url_for('admin_manage',arg='admin'))
 		else:
@@ -1055,7 +1181,11 @@ def newAdmin_create():
 			news = request.form['news']
 			revenue = request.form['revenue']
 
-			db.exe_commit(SQL['newAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,r=revenue))
+			if '@' in acount:
+				db.exe_commit(SQL['newAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,r=revenue))
+			else:
+				message = "'@' should not be in 'account'"
+				return render_template('back.html',title='Error',message=message)
 
 			return redirect(url_for('admin_manage',arg='admin'))
 		else:

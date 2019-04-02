@@ -20,11 +20,35 @@
 			</tr>
 			<tr>
 				<td style="text-align: right;">email: </td>
-				<td><input class="form-control" type="text" name="email" value="{{data.email}}" required></td>
+				<td><input class="form-control" type="email" name="email" value="{{data.email}}" required></td>
 			</tr>
 			<tr>
 				<td style="text-align: right;">password: </td>
 				<td><input class="form-control" type="text" name="password" value="{{data.password}}" required></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">state: </td>
+				<td>
+					{% if data.state == 'able' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required checked>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable">
+						Disable
+					</label>
+					{% elif data.state == 'disable' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable" checked>
+						Disable
+					</label>
+					{% endif %}
+				</td>
 			</tr>
 			<tr>
 				<td></td>
@@ -87,15 +111,15 @@
 			</tr>
 			<tr>
 				<td style="text-align: right;">title: </td>
-				<td><input name="title" class="form-control" type="text" name="email" value="{{data.title}}" required></td>
+				<td><input name="title" class="form-control" type="text" value="{{data.title}}" required></td>
 			</tr>
 			<tr>
 				<td style="text-align: right;">price: </td>
-				<td><input name="price" class="form-control" type="text" name="number" step="any" value="{{data.price}}" required></td>
+				<td><input name="price" class="form-control" type="text" step="any" value="{{data.price}}" required></td>
 			</tr>
 			<tr>
 				<td style="text-align: right;">description: </td>
-				<td><input name="description" class="form-control" type="text" name="text" value="{{data.description}}" required></td>
+				<td><input name="description" class="form-control" type="text" value="{{data.description}}" required></td>
 			</tr>
 			<tr>
 				<td style="text-align: right;">content: </td>
@@ -109,6 +133,30 @@
                 		<input class="form-control" type="file" name="img" style="width : 100%;border-radius: 0px">
                 		<label for="img">&nbsp;Select a image(.png or .jpg) to upload for your Article.</label>
             		</div>
+				</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">state: </td>
+				<td>
+					{% if data.state == 'able' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required checked>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable">
+						Disable
+					</label>
+					{% elif data.state == 'disable' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable" checked>
+						Disable
+					</label>
+					{% endif %}
 				</td>
 			</tr>
 			<tr>
@@ -145,6 +193,30 @@
 			<tr>
 				<td style="text-align: right;">content: </td>
 				<td><textarea name="comment" style="width: 800px;height: 200px" required>{{data.comment}}</textarea></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">state: </td>
+				<td>
+					{% if data.state == 'able' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required checked>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable">
+						Disable
+					</label>
+					{% elif data.state == 'disable' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable" checked>
+						Disable
+					</label>
+					{% endif %}
+				</td>
 			</tr>
 			<tr>
 				<td></td>
@@ -227,11 +299,57 @@
 				</td>
 			</tr>
 			<tr>
+				<td style="text-align: right;">state: </td>
+				<td>
+					{% if data.state == 'able' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required checked>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable">
+						Disable
+					</label>
+					{% elif data.state == 'disable' %}
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="able" required>
+						Able
+					</label>
+					<label style="display: inline;">
+						<input class="form-control" type="radio" name="state" value="disable" checked>
+						Disable
+					</label>
+					{% endif %}
+				</td>
+			</tr>
+			<tr>
 				<td></td>
 				<td style="text-align: right;"><button class="btn btn-success" type="submit">Submit</button></td>
 			</tr>
 	</div>
 </form>
+{% endif %}
+
+{% if type == 'record' %}
+<div style="width: 100%">
+		<table style="margin: auto;">
+			<tr>
+				<td style="text-align: right;">recordID: </td>
+				<td style="text-align: center;">{{data.recordID}}</td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">article: </td>
+				<td style="text-align: center;"><a href="{{url_for('admin_edit',arg='article',ID=data.article)}}">{{data.article}}</a></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">owner: </td>
+				<td style="text-align: center;"><a href="{{url_for('admin_edit',arg='client',ID=data.owner)}}">{{data.owner}}</a></td>
+			</tr>
+			<tr>
+				<td style="text-align: right;">date: </td>
+				<td style="text-align: center;">{{data.date}}</td>
+			</tr>
+</div>
 {% endif %}
 
 {% if type == 'composeNews' %}

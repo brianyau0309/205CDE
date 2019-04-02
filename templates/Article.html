@@ -45,9 +45,13 @@
         <div style="padding: 20px">
             <span id="articleDate" style="float: left;">{{date}}</span>
             {% if owner %}
+            <form action="{{url_for('disable_own_article',aID=articleID)}}" method="post" style="display:inline;">
+                <input type="hidden" name="articleID" value="{{articleID}}">
+                <button class="btn btn-danger" style="float: right;border-radius: 0px">Delete</button>
+            </form>
             <form action="{{url_for('edit_own_article',aID=articleID)}}" method="post" style="display:inline;">
                 <input type="hidden" name="articleID" value="{{articleID}}">
-                <button class="btn btn-danger" style="float: right;border-radius: 0px">Edit</button>
+                <button class="btn btn-warning" style="float: right;border-radius: 0px">Edit</button>
             </form>
             {% endif %}
         </div>

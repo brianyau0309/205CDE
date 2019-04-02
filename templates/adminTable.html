@@ -38,6 +38,7 @@
 				<td>{{i.nickname}}</td>
 				<td>{{i.email}}</td>
 				<td>{{i.password}}</td>
+				<td>{{i.state}}</td>
 			</tr>
 			{% endfor %}
 		</tbody>
@@ -54,6 +55,7 @@
 				<td>{{i.price}}</td>
 				<td>{{i.sales}}</td>
 				<td>{{i.date}}</td>
+				<td>{{i.state}}</td>
 			</tr>
 			{% endfor %}
 		</tbody>
@@ -67,6 +69,7 @@
 				<td>{{i.article}}</td>
 				<td>{{i.author}}</td>
 				<td>{{i.date}}</td>
+				<td>{{i.state}}</td>
 			</tr>
 			{% endfor %}
 		</tbody>
@@ -80,6 +83,20 @@
 				<td>{{i.type}}</td>
 				<td>{{i.title}}</td>
 				<td>{{i.author}}</td>
+				<td>{{i.date}}</td>
+				<td>{{i.state}}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		{% endif %}
+
+		{% if recordData %}
+		<tbody>
+			{% for i in recordData %}
+			<tr class="tableRow" onclick="document.location='{{i.url}}';" style="text-align: center">
+				<td>{{i.recordID}}</td>
+				<td>{{i.article}}</td>
+				<td>{{i.owner}}</td>
 				<td>{{i.date}}</td>
 			</tr>
 			{% endfor %}

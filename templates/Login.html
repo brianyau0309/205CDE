@@ -36,7 +36,8 @@
                         <label class="loginUI">
                             <input type="checkbox" name="remember"> Remember Me
                         </label>
-                        <button type="submit" class="btn btn-danger" style="margin-top: 10px">Log In</button>                 
+                        <button type="submit" class="btn btn-danger" style="margin-top: 10px">Log In</button>    
+                        <label style="display: block"><a href="#" data-toggle="modal" data-target="#forgetModal">forget password?</a></label>             
                     </div>
                 </form>
                 <!--From End-->
@@ -53,6 +54,26 @@
         </div>
     </div>
 </section>
+<div class="modal fade" id="forgetModal" tabindex="-1" role="dialog" aria-labelledby="forgetModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="background-color: #78C2AD">
+        <h5 class="modal-title" id="forgetModalLabel" style="color:white;">Changing Password</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true" style="color: white">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="background-color: white;">
+        <form action="{{url_for('forgetpassword')}}" method="post">
+          <input id="opassword" class="form-control" type="email" name="forget_email" placeholder="email" required>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSubmit" type="submit" class="btn btn-primary" style="width: 100%">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 <!--Content End-->
 <script>
 {% with messages = get_flashed_messages() %}
