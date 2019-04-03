@@ -26,7 +26,7 @@
                     </p>
                 </div>
                 <div style="width: 30%;margin: auto;padding: 60px">
-                    <img src="{{usericon}}" style="width: 100px;height: 100px;">
+                    <img src="{{url_for('static',filename=userIcon)}}" style="width: 100px;height: 100px;">
                 </div>
                 <table style="color: white; font-size: 30px;width: 100%;text-align: center">
                     <tr>
@@ -51,7 +51,7 @@
                 </table>
 
 
-                <div class="signUpUIFooter"><a href="#">Login Now!</a></div>
+                <div class="signUpUIFooter"><a href="{{url_for('login')}}">Login Now!</a></div>
             </div>
         </div>
     </div>

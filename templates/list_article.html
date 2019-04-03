@@ -42,14 +42,26 @@
 </div>
 <div class="row" style="margin-bottom: 0px !important">
 <div class="col-sm-12" style="width: 100%;">
-
     {% for i in articles %}
     {% if i['state'] == 'able' and My %}
-    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 150px;background-color: white;">
-        <img src="{{url_for('static',filename=i.image)}}" style="float: left; width:30%;height: 150px">
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 250px;background-color: white;">
+        <img src="{{url_for('static',filename=i.image)}}" style="float: left; width:30%;height: 250px">
         <div>
             <a href="{{url_for('article', aID=i.articleID)}}"><div style="width: 100%;background-color: #78C2AD;padding: 10px 20px 10px 20px; color: white;font-size: 25px;">&nbsp;{{i.title}}</div></a>
-            <div style="height: 67px;padding-top:5px;padding-left: 30px; color: gray">&nbsp;&nbsp;{{i.description}}</div>
+            <div style="height: 167px;padding-top:5px;padding-left: 30px; color: gray">&nbsp;&nbsp;{{i.description}}</div>
+            <div style="width: 100%;height: 25px;padding-left: 10px;padding-right: 10px">
+                <span style="float: left;">&nbsp;Sales: {{i.sales}}</span>
+                <span style="float: right;">Date: {{i.date}}</span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if not My %}
+    <div style="margin: auto;margin-top: 20px;margin-bottom: 5px; width:80%;height: 250px;background-color: white;">
+        <img src="{{url_for('static',filename=i.image)}}" style="float: left; width:30%;height: 250px">
+        <div>
+            <a href="{{url_for('article', aID=i.articleID)}}"><div style="width: 100%;background-color: #78C2AD;padding: 10px 20px 10px 20px; color: white;font-size: 25px;">&nbsp;{{i.title}}</div></a>
+            <div style="height: 167px;padding-top:5px;padding-left: 30px; color: gray">&nbsp;&nbsp;{{i.description}}</div>
             <div style="width: 100%;height: 25px;padding-left: 10px;padding-right: 10px">
                 <span style="float: left;">&nbsp;Sales: {{i.sales}}</span>
                 <span style="float: right;">Date: {{i.date}}</span>
@@ -58,6 +70,7 @@
     </div>
     {% endif %}
     {% endfor %}
+    <div style="text-align: center;font-size: 40px">No More Article...</div>
 
 </div>
 </div>

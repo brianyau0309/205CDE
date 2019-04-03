@@ -81,7 +81,6 @@ def get_cart(): #get user by session
 @app.route('/index')
 @app.route('/')
 def home():
-	print(get_cart())
 	items = db.exe_fetch(SQL['hot_item'],'all')
 	for i in items:
 		ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=i['owner']))['nickname']
@@ -147,7 +146,7 @@ def forgetpassword():
 		return render_template('back.html',title='Error',message=message)
 	else:
 		msg = Message('CooKinGdom - Forget Password',sender = 'cookingdom@gmail.com',recipients=[email])
-		msg.body = "Here is your new password: " + checkEmail.get('password')
+		msg.body = "Here is your password: " + checkEmail.get('password')
 		mail.send(msg)
 
 		message = 'Success! Check You email.'
@@ -194,7 +193,7 @@ def signup_done():
 				db.exe_commit(SQL['signup'].format(e=email,n=name,p=password))
 				userInfo = db.exe_fetch(SQL['clientInfo_email'].format(email=email))
 
-				return render_template('SignUp_Done.html',userID=userInfo['clientID'],userName=userInfo['nickname'],userEmail=userInfo['email'],userPassword=userInfo['password'])
+				return render_template('SignUp_Done.html',userIcon='image/icon/default.png',userID=userInfo['clientID'],userName=userInfo['nickname'],userEmail=userInfo['email'],userPassword=userInfo['password'])
 			else:
 				flash('Used email','email')
 				return redirect(url_for('signup'))
@@ -215,7 +214,7 @@ def record():
 				record['image'] = 'image/article/'+str(record['articleID'])+'.jpg'
 			else:
 				record['image'] = 'image/article/default.png'
-		
+
 		return render_template('list_article.html',pageTitle='Record',userInfo=get_user(),cart=get_cart(),articles=records)
 	else:
 		return redirect(url_for('login'))
@@ -267,6 +266,12 @@ def edit_done():
 		file = request.files['img']
 		if file and allowed_file(file.filename):
 			filename = str(articleID) + '.' + secure_filename(file.filename).split('.')[-1]
+
+			if Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.png').exists():
+				os.remove(os.getcwd()+'/static/image/article/'+str('articleID')+'.png')
+			elif Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg').exists():
+				os.remove(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg')
+
 			file.save(os.path.join(app.config['UPLOAD_ARTICLE_FOLDER'], filename))
 		elif file.filename == '':
 			pass
@@ -288,7 +293,7 @@ def edit_own_article(aID):
 			message = 'Blocked Article'
 			return render_template('back.html',title='Error',message=message)
 		if user == author:
-			return render_template('userEdit.html',data=a,articleID=aID)
+			return render_template('userEdit.html',userInfo=get_user(),cart=get_cart(),data=a,articleID=aID)
 		else: 
 			message = 'You don\'t have permission'
 			return render_template('back.html',title='Error',message=message)
@@ -313,6 +318,11 @@ def own_edit_done():
 			db.exe_commit(SQL['updateArticle_owner'].format(cate=category,t=title,p=price,d=description,cont=content,ID=articleID))
 			if file and allowed_file(file.filename):
 				filename = str(articleID) + '.' + secure_filename(file.filename).split('.')[-1]
+				if Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.png').exists():
+					os.remove(os.getcwd()+'/static/image/article/'+str(articleID)+'.png')
+				elif Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg').exists():
+					os.remove(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg')
+
 				file.save(os.path.join(app.config['UPLOAD_ARTICLE_FOLDER'], filename))
 			elif file.filename == '':
 				pass
@@ -440,6 +450,10 @@ def uploadicon():
 		file = request.files['icon']
 		if file and allowed_file(file.filename):
 			filename = user + '.' + secure_filename(file.filename).split('.')[-1]
+			if Path(os.getcwd()+'/static/image/icon/'+str(user)+'.png').exists():
+				os.remove(os.getcwd()+'/static/image/icon/'+str(user)+'.png')
+			elif Path(os.getcwd()+'/static/image/icon/'+str(user)+'.jpg').exists():
+				os.remove(os.getcwd()+'/static/image/icon/'+str(user)+'.jpg')
 			file.save(os.path.join(app.config['UPLOAD_ICON_FOLDER'], filename))
 			flash("icon", "iconSuccess")
 
@@ -1047,6 +1061,12 @@ def edit_article():
 
 			if file and allowed_file(file.filename):
 				filename = str(articleID) + '.' + secure_filename(file.filename).split('.')[-1]
+
+				if Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.png').exists():
+					os.remove(os.getcwd()+'/static/image/article/'+str(articleID)+'.png')
+				elif Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg').exists():
+					os.remove(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg')
+
 				file.save(os.path.join(app.config['UPLOAD_ARTICLE_FOLDER'], filename))
 			elif file.filename == '':
 				pass
@@ -1113,7 +1133,13 @@ def edit_carousel():
 
 			if file and allowed_file(file.filename):
 				filename = 'C' + str(num) + '.' + secure_filename(file.filename).split('.')[-1]
+
+				if Path(os.getcwd()+'/static/image/Carousel/'+ 'C' + str(num)+'.png').exists():
+					os.remove(os.getcwd()+'/static/image/Carousel/'+ 'C' + str(num)+'.png')
+				elif Path(os.getcwd()+'/static/image/Carousel/'+ 'C' + str(num)+'.jpg').exists():
+					os.remove(os.getcwd()+'/static/image/Carousel/'+ 'C' + str(num)+'.jpg')
 				file.save(os.path.join(app.config['UPLOAD_CAROUSEL_FOLDER'], filename))
+
 				return redirect(url_for('admin_manage',arg='carousel'))
 			elif file.filename == '':
 				pass

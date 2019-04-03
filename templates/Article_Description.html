@@ -87,7 +87,7 @@
             <div style="font-size: 15px;text-align: center">Client ID: {{c.author}}
                 {% if session.get('clientID') == c.author %}
                 <form action="{{url_for('disable_own_comment')}}" method="post">
-                    <input type="hidden" name="commentID" value="{{c.author}}">
+                    <input type="hidden" name="commentID" value="{{c.commentID}}">
                     <button type="submit" style="float: right;border: 1px solid gray">Delete</button>
                 </form>
                 {%endif%}
