@@ -768,7 +768,7 @@ def news_content(nID):
 		return render_template('back.html',title='Error',message=message)
 
 	news['content'] = news['content'].replace('\n','<br>')
-	return render_template('News_content.html',news=news)
+	return render_template('News_content.html',userInfo=get_user(),cart=get_cart(),news=news)
 
 @app.route('/composeNews')
 def composeNews():
