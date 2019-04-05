@@ -1179,10 +1179,10 @@ def edit_admin():
 			news = request.form['news']
 			revenue = request.form['revenue']
 
-			if '@' in account:
+			if '@' not in account:
 				db.exe_commit(SQL['updateAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,revenue=revenue,ID=adminID))
 			else:
-				message = "'@' should not be in 'account'"
+				message = "@ should not be in account"
 				return render_template('back.html',title='Error',message=message)
 
 			return redirect(url_for('admin_manage',arg='admin'))
@@ -1210,7 +1210,7 @@ def newAdmin_create():
 			if '@' not in account:
 				db.exe_commit(SQL['newAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,r=revenue))
 			else:
-				message = "'@' should not be in 'account'"
+				message = "@ should not be in account"
 				return render_template('back.html',title='Error',message=message)
 
 			return redirect(url_for('admin_manage',arg='admin'))
