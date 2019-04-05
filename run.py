@@ -1207,7 +1207,7 @@ def newAdmin_create():
 			news = request.form['news']
 			revenue = request.form['revenue']
 
-			if '@' in acount:
+			if '@' not in account:
 				db.exe_commit(SQL['newAdmin'].format(ac=account,p=password,client=client,article=article,comment=comment,carousel=carousel,news=news,r=revenue))
 			else:
 				message = "'@' should not be in 'account'"
