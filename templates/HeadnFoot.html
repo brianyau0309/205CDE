@@ -14,7 +14,9 @@
   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <script src="{{url_for('static', filename='AssignmentJS.js')}}"></script>
 	<!--External JavaScript End-->
-	
+
+	<!--Icon-->
+    <link rel="shortcut icon" href="{{url_for('static', filename='favicon.ico')}}">
 </head>
 <body>
 
@@ -47,7 +49,7 @@
         <!--Dropdown Bootstrap-->
         <ul class="nav nav-pills">
             <li class="nav-item dropdown show">
-		<a class="nav-link dropdown-toggle Hello" data-toggle="dropdown" role="button">Hello, {% block username %}{% endblock %}</a>
+		<a class="nav-link dropdown-toggle Hello" data-toggle="dropdown" role="button" href="#">Hello, {% block username %}{% endblock %}</a>
 			{% block dropdown %}{% endblock %}
      	  	</li>
         </ul>
@@ -175,7 +177,7 @@
             </div>
             <div style="display: inline;width: 60%;height: 100%;float: right;background-color: #78C2AD;color: white;">
               <div style="width: 100%; height: 80%">
-                <div style="font-size: 20px">{{ i.title }}</div>
+                <div style="font-size: 20px"><a href="{{url_for('article_description',aID=i.articleID)}}" style="color:white">{{ i.title }}</a></div>
                 <div style="font-size: 15px">Author: {{ i.author }}</div>
                 <div style="font-size: 15px">Category: {{ i.category }}</div>
               </div>

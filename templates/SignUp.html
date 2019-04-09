@@ -29,12 +29,12 @@
                 <!--Form start-->
                 <form method="POST" action="{{url_for('signup_done')}}">
                     <input class="form-control signUpUI" type="email" name="email" placeholder="Email" required>
-                    <input id="name" class="form-control signUpUI" type="text" name="name" placeholder="NickName (10 words)" required>
-                    <input id="password" class="form-control signUpUI" type="password" name="password" placeholder="Password (8-15 numbers and words)" minlength="8" required>
-					<input id="cpassword" class="form-control signUpUI" type="password" name="cpassword" placeholder="Confirm Password" minlength="8" required>
+                    <input id="name" class="form-control signUpUI" maxlength="10" type="text" name="name" placeholder="NickName (10 words)" required>
+                    <input id="password" class="form-control signUpUI" type="password" name="password" placeholder="Password (8-15 numbers and words)" minlength="8" maxlength="15" required>
+					<input id="cpassword" class="form-control signUpUI" type="password" name="cpassword" placeholder="Confirm Password" minlength="8" maxlength='15' required>
 					<div class="signUpUI">
                         <input type="checkbox" name="agree" required>
-                        <span> I Agree To The <a href="#">Terms & Conditions</a></span>
+                        <span> I Agree To The <a href="#" id="T&C">Terms & Conditions</a></span>
                     </div>
                     <button id="btn_signup" class="btn btn-danger signUpUI" style="font-size:25px;display: block">Sign Up</button>
                 </form>
@@ -81,7 +81,7 @@
         };
     })
     $('#password, #cpassword').on('keyup', function() {
-        if ($('#password').val() != $('#cpassword').val() || $('#cpassword').val().length == 0) {
+        if ($('#password').val() != $('#cpassword').val() || $('#cpassword').val().length == 0 || $('#cpassword').val().length > 15) {
             $('#cpassword').removeClass("is-valid");
             $('#cpassword').addClass("is-invalid");
 	    $('#btn_signup').prop('disabled, false');

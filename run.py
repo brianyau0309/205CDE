@@ -98,7 +98,6 @@ def home():
 ###############################################################################################
 #Home end
 
-
 #login
 ###############################################################################################
 @app.route('/login')
@@ -363,7 +362,7 @@ def article_description(aID):
 				i['icon'] = 'image/icon/default.png'
 			counter -= 1
 
-		return render_template('Article_Description.html', userInfo=get_user(),cart=get_cart(),title=a['title'], price=a['price'], description=a['description'].replace('\n','<br>'), date=a['date'], name=ownerName, articleID=a['articleID'],comment=comment)
+		return render_template('Article_Description.html', userInfo=get_user(),cart=get_cart(),title=a['title'], price=a['price'], description=a['description'].replace('\n','<br>'), date=a['date'], name=ownerName, articleID=a['articleID'],comment=comment,id=a['owner'])
 	else:
 		message = 'Blocked Article'
 		return render_template('back.html',title='Erroe',message=message)
@@ -407,14 +406,14 @@ def article(aID):
 		user = session['clientID']
 		bought = db.exe_fetch(SQL['checkRecord'].format(clientID=user,articleID=aID))
 		a = db.exe_fetch(SQL['articleInfo'].format(ID=aID))
-		author = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['clientID']
+		author = a['owner']
 		if a.get('state') == 'disable':
 			message = 'Blocked Article'
 			return render_template('back.html',title='Erroe',message=message)
 
 		if bought != None or user == author:
 			ownerName = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['nickname']
-			return render_template('Article.html', userInfo=get_user(),cart=get_cart(),title=a['title'], content=a['content'].replace('\n','<br>'), date=a['date'], name=ownerName,articleID=aID,owner=(user==author))
+			return render_template('Article.html', userInfo=get_user(),cart=get_cart(),title=a['title'], content=a['content'].replace('\n','<br>'), date=a['date'], name=ownerName,articleID=aID,owner=(user==author),id=author)
 		else: 
 			flash('buy', 'buy')
 			return redirect(url_for('home'))
@@ -463,7 +462,6 @@ def uploadicon():
 		return redirect(url_for('home'))
 	else:
 		return redirect(url_for('login'))
-
 
 @app.route('/changePassword', methods=['post'])
 def changePassword():
@@ -688,7 +686,7 @@ def category(arg):
 				
 		return render_template('Category.html',userInfo=get_user(),cart=get_cart(),category=category,description=description,result=result,items=itemIn4)
 ###############################################################################################
-
+#Category end
 
 #About
 ###############################################################################################
@@ -696,6 +694,7 @@ def category(arg):
 def about():
 	return render_template('About.html',userInfo=get_user(),cart=get_cart())
 ###############################################################################################
+#About end
 
 
 #Searching
@@ -733,6 +732,7 @@ def search(sort):
 
 	return render_template('Category.html',userInfo=get_user(),cart=get_cart(),category='Search',description='Key: ' + q, result=result,items=itemIn4,q=q)
 ###############################################################################################s
+#Searching end
 
 #News
 ###############################################################################################
@@ -1142,7 +1142,8 @@ def edit_carousel():
 
 				return redirect(url_for('admin_manage',arg='carousel'))
 			elif file.filename == '':
-				pass
+				message = 'Image Not Found'
+				return render_template('back.html',title='Error',message=message)
 			else:
 				message = 'Invaild format of Image'
 				return render_template('back.html',title='Error',message=message)
@@ -1228,6 +1229,7 @@ def admin_out():
 	else:
 		return redirect(url_for('login'))
 ###############################################################################################
+#Admin end
 
 #Errorhandler
 ###############################################################################################
