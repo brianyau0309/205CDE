@@ -9,18 +9,21 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 import os, datetime
 ###############################################################################################
+#File upload setting
 UPLOAD_ICON_FOLDER = os.getcwd()  + '/static/image/icon'
 UPLOAD_ARTICLE_FOLDER = os.getcwd()  + '/static/image/article'
 UPLOAD_CAROUSEL_FOLDER = os.getcwd()  + '/static/image/Carousel'
 ALLOWED_EXTENSIONS = set(['png', 'jpg'])
 
 app = Flask(__name__)
+
+#Session Setting
 app.config['SECRET_KEY'] = os.urandom(24)
 app.config['UPLOAD_ICON_FOLDER'] = UPLOAD_ICON_FOLDER
 app.config['UPLOAD_ARTICLE_FOLDER'] = UPLOAD_ARTICLE_FOLDER
 app.config['UPLOAD_CAROUSEL_FOLDER'] = UPLOAD_CAROUSEL_FOLDER
 
-mail = Mail(app)
+#Flask-Mail Setting
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'cookingdom2019@gmail.com'
@@ -34,7 +37,7 @@ db = connection()
 
 #function
 ###############################################################################################
-def allowed_file(filename):
+def allowed_file(filename): # To determain the image format
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -53,7 +56,7 @@ def get_user(): #get user by session
 	else:
 		return 'Guest'
 
-def get_cart(): #get user by session
+def get_cart(): #get user cart by session
 	user = session.get('clientID')
 	if user != None:
 		items = db.exe_fetch(SQL["cart_owner"].format(ID=user), 'all')
@@ -78,7 +81,7 @@ def get_cart(): #get user by session
 
 #Home
 ###############################################################################################
-@app.route('/index')
+@app.route('/index') # The Home page with the 8 hottest item
 @app.route('/')
 def home():
 	items = db.exe_fetch(SQL['hot_item'],'all')
@@ -100,21 +103,21 @@ def home():
 
 #login
 ###############################################################################################
-@app.route('/login')
+@app.route('/login') #Login page and redirect to home if logged in
 def login():
 	if session.get('clientID') != None:
 		return redirect(url_for('home'))	
 	else:
 		return render_template('Login.html')
 
-@app.route('/login_done', methods = ["post"])
+@app.route('/login_done', methods = ["post"]) #Login process
 def login_done():
 	email = request.form["email"]
 	password = request.form["password"]
 	checkAdmin = db.exe_fetch(SQL['adminInfo_ac'].format(ac=email))
 	checkEmail = db.exe_fetch(SQL['clientInfo_email'].format(email=email))
 
-	if checkAdmin == None:
+	if checkAdmin == None: #Check admin
 		pass
 	elif checkAdmin.get('password') != password:
 		pass
@@ -122,7 +125,7 @@ def login_done():
 		session['admin'] = checkAdmin['adminID']
 		return redirect(url_for('admin'))
 
-	if (checkEmail == None):
+	if (checkEmail == None): #Check client
 		flash("Invaild")
 		return redirect(url_for('login'))
 	elif  (checkEmail.get('state') != 'able'):
@@ -136,7 +139,7 @@ def login_done():
 		return redirect(url_for('home'))
 
 
-@app.route('/forgetpassword', methods=['post'])
+@app.route('/forgetpassword', methods=['post']) #flask-mail send email if the client exist in database
 def forgetpassword():
 	email = request.form['forget_email']
 	checkEmail = db.exe_fetch(SQL['clientInfo_email'].format(email=email))
@@ -152,7 +155,7 @@ def forgetpassword():
 		return render_template('back.html',title='Success',message=message)
 
 
-@app.route('/logout')
+@app.route('/logout') #Logout
 def logout():
 	if session.get('clientID') != None:
 		session.pop('clientID')
@@ -164,7 +167,7 @@ def logout():
 
 #signup
 ###############################################################################################
-@app.route('/signup')
+@app.route('/signup') #Signup page and redirect to home if logged in
 def signup():
 	if session.get('clientID') != None:
 		return redirect(url_for('home'))	
@@ -172,7 +175,7 @@ def signup():
 		return render_template('SignUp.html')
 
 
-@app.route('/signup_done', methods = ["post"])
+@app.route('/signup_done', methods = ["post"]) #Signup process
 def signup_done():
 	if session.get('clientID') != None:
 		return redirect(url_for('home'))
@@ -184,11 +187,11 @@ def signup_done():
 
 		checkEmail = db.exe_fetch(SQL['clientInfo_email'].format(email=email))
 
-		if password != cpassword:
+		if password != cpassword: #check if two password are the same
 			flash('Invaild','error')
 			return redirect(url_for('signup'))
 		else:
-			if checkEmail == None:
+			if checkEmail == None: #Check the email is used or not
 				db.exe_commit(SQL['signup'].format(e=email,n=name,p=password))
 				userInfo = db.exe_fetch(SQL['clientInfo_email'].format(email=email))
 
@@ -201,7 +204,7 @@ def signup_done():
 
 #user pages
 ###############################################################################################
-@app.route('/record')
+@app.route('/record') #Record page which will show client buying record
 def record():
 	if session.get('clientID') != None:
 		userID = session.get('clientID')
@@ -219,7 +222,7 @@ def record():
 		return redirect(url_for('login'))
 
 
-@app.route('/myarticle')
+@app.route('/myarticle') #MyArticle Page which will show acticle that compose by client
 def myarticle():
 	if session.get('clientID') != None:
 		userID = session.get('clientID')
@@ -240,7 +243,7 @@ def myarticle():
 
 #edition
 ###############################################################################################
-@app.route('/edit')
+@app.route('/edit') #Edit page for client to compose their article and redirect to login page if guest
 def edit():
 	if session.get('clientID') != None:
 		return render_template('Edition.html',userInfo=get_user(),cart=get_cart())	
@@ -248,7 +251,7 @@ def edit():
 		return redirect(url_for('login'))	
 
 
-@app.route("/edit_done", methods=['post'])
+@app.route("/edit_done", methods=['post']) #Edit page process
 def edit_done():
 	if session.get('clientID') != None:
 		clientID = session.get('clientID')
@@ -263,14 +266,8 @@ def edit_done():
 		articleID = db.cursor.lastrowid
 
 		file = request.files['img']
-		if file and allowed_file(file.filename):
+		if file and allowed_file(file.filename): #Upload Image
 			filename = str(articleID) + '.' + secure_filename(file.filename).split('.')[-1]
-
-			if Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.png').exists():
-				os.remove(os.getcwd()+'/static/image/article/'+str('articleID')+'.png')
-			elif Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg').exists():
-				os.remove(os.getcwd()+'/static/image/article/'+str(articleID)+'.jpg')
-
 			file.save(os.path.join(app.config['UPLOAD_ARTICLE_FOLDER'], filename))
 		elif file.filename == '':
 			pass
@@ -282,13 +279,13 @@ def edit_done():
 	else:
 		return redirect(url_for('login'))
 
-@app.route("/edit_own_article/<path:aID>", methods=['post'])
+@app.route("/edit_own_article/<path:aID>", methods=['post']) #Page for Edit existing article which only can edit bt article owner
 def edit_own_article(aID):
 	if session.get('clientID') != None:
 		user = session['clientID']
 		a = db.exe_fetch(SQL['articleInfo'].format(ID=aID))
 		author = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=a['owner']))['clientID']
-		if a['state'] == 'disable':
+		if a['state'] == 'disable': #only can edit if article status is able 
 			message = 'Blocked Article'
 			return render_template('back.html',title='Error',message=message)
 		if user == author:
@@ -299,7 +296,7 @@ def edit_own_article(aID):
 	else:
 		return redirect(url_for('login'))
 
-@app.route("/own_edit_done", methods=['post'])
+@app.route("/own_edit_done", methods=['post']) #Process of Edit existing article
 def own_edit_done():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -315,6 +312,7 @@ def own_edit_done():
 			category = request.form['category'].lower()
 
 			db.exe_commit(SQL['updateArticle_owner'].format(cate=category,t=title,p=price,d=description,cont=content,ID=articleID))
+
 			if file and allowed_file(file.filename):
 				filename = str(articleID) + '.' + secure_filename(file.filename).split('.')[-1]
 				if Path(os.getcwd()+'/static/image/article/'+str(articleID)+'.png').exists():
@@ -342,7 +340,7 @@ def own_edit_done():
 
 #article
 ###############################################################################################
-@app.route('/article_description/<path:aID>/')
+@app.route('/article_description/<path:aID>/') #Page for show article description to client and guest
 def article_description(aID):
 	a = db.exe_fetch(SQL['articleInfo'].format(ID=aID))
 	if a.get('state') == 'able':
@@ -367,7 +365,7 @@ def article_description(aID):
 		message = 'Blocked Article'
 		return render_template('back.html',title='Erroe',message=message)
 
-@app.route('/comment', methods=['post'])
+@app.route('/comment', methods=['post']) #Process for client compose comment
 def comment():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -383,7 +381,7 @@ def comment():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/disable_own_comment', methods=['post'])
+@app.route('/disable_own_comment', methods=['post']) #Process for client disable own comment
 def disable_own_comment():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -400,7 +398,7 @@ def disable_own_comment():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/article/<path:aID>/')
+@app.route('/article/<path:aID>/') #Page for show article content to client who brought the it
 def article(aID):
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -420,7 +418,7 @@ def article(aID):
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/disable_own_article', methods=['post'])
+@app.route('/disable_own_article', methods=['post']) #Process for client disable own article
 def disable_own_article():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -442,7 +440,7 @@ def disable_own_article():
 
 #Profile function
 ###############################################################################################
-@app.route('/uploadicon', methods=['post'])
+@app.route('/uploadicon', methods=['post']) #Process for client change and upload icon
 def uploadicon():
 	if session.get('clientID') != None:
 		user = str(session['clientID'])
@@ -463,7 +461,7 @@ def uploadicon():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/changePassword', methods=['post'])
+@app.route('/changePassword', methods=['post']) #Process for client change password
 def changePassword():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -474,7 +472,7 @@ def changePassword():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/addtocart', methods=['post'])
+@app.route('/addtocart', methods=['post']) #Process for client add article product to their cart
 def addtocart():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -499,7 +497,7 @@ def addtocart():
 		return redirect(url_for('login'))
 
 
-@app.route('/buyone', methods=['post'])
+@app.route('/buyone', methods=['post']) #Process for client buy the article directly and see content in persent
 def buyone():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -538,7 +536,7 @@ def buyone():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/cart_del', methods=['post'])
+@app.route('/cart_del', methods=['post']) #Process for client del article product from their cart
 def cart_del():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -551,7 +549,7 @@ def cart_del():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/purchase', methods=['post'])
+@app.route('/purchase', methods=['post']) #Process for client biy all the article in their cart
 def purchase():
 	if session.get('clientID') != None:
 		user = session['clientID']
@@ -587,9 +585,9 @@ def purchase():
 
 #Category page
 ###############################################################################################
-@app.route('/category/<path:arg>')
+@app.route('/category/<path:arg>') #Category page which show acticle of that category
 def category(arg):
-	if arg == 'chinese':
+	if arg == 'chinese': #Category Chinese
 		category = 'Chinese'
 		description = 'The Cooking Style in Chinese'
 		items = db.exe_fetch(SQL['categoryResult'].format(c=arg),'all')
@@ -613,7 +611,8 @@ def category(arg):
 				items = []
 
 		return render_template('Category.html',userInfo=get_user(),cart=get_cart(),category=category,description=description,result=result,items=itemIn4)
-	elif arg == 'europe':
+
+	elif arg == 'europe': #Category Europe
 		category = 'Europe'
 		description = 'The Cooking Style in Europe'
 		items = db.exe_fetch(SQL['categoryResult'].format(c=arg),'all')
@@ -637,7 +636,8 @@ def category(arg):
 				items = []
 				
 		return render_template('Category.html',userInfo=get_user(),cart=get_cart(),category=category,description=description,result=result,items=itemIn4)
-	elif arg == 'japanese':
+
+	elif arg == 'japanese': #Category Japanese
 		category = 'Japanese'
 		description = 'The Cooking Style in Japanese'
 		items = db.exe_fetch(SQL['categoryResult'].format(c=arg),'all')
@@ -661,7 +661,8 @@ def category(arg):
 				items = []
 				
 		return render_template('Category.html',userInfo=get_user(),cart=get_cart(),category=category,description=description,result=result,items=itemIn4)
-	elif arg == 'other':
+
+	elif arg == 'other': #Category Other
 		category = 'Other'
 		description = 'The Cooking Style in Other'
 		items = db.exe_fetch(SQL['categoryResult'].format(c=arg),'all')
@@ -690,7 +691,7 @@ def category(arg):
 
 #About
 ###############################################################################################
-@app.route('/about')
+@app.route('/about') #About page
 def about():
 	return render_template('About.html',userInfo=get_user(),cart=get_cart())
 ###############################################################################################
@@ -699,7 +700,7 @@ def about():
 
 #Searching
 ###############################################################################################
-@app.route('/search/<path:sort>/', methods=['get'])
+@app.route('/search/<path:sort>/', methods=['get']) #Page and process for searching and sorting
 def search(sort):
 	q = request.args.get('q')
 	if sort == 'newest':
@@ -736,7 +737,7 @@ def search(sort):
 
 #News
 ###############################################################################################
-@app.route('/news/<path:arg>')
+@app.route('/news/<path:arg>') #News Page which show news compose by admin
 def news(arg):
 	if arg == 'all':
 		items = db.exe_fetch(SQL['allNews_desc'],'all')
@@ -760,7 +761,7 @@ def news(arg):
 
 	return render_template('News.html', userInfo=get_user(),cart=get_cart(),news=itemIn3)
 
-@app.route('/news_content/<path:nID>')
+@app.route('/news_content/<path:nID>') #News content page
 def news_content(nID):
 	news = db.exe_fetch(SQL['newsInfo'].format(ID=nID))
 	if news['state'] == 'disable':
@@ -770,7 +771,7 @@ def news_content(nID):
 	news['content'] = news['content'].replace('\n','<br>')
 	return render_template('News_content.html',userInfo=get_user(),cart=get_cart(),news=news)
 
-@app.route('/composeNews')
+@app.route('/composeNews') #Page for admin compose News
 def composeNews():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -782,7 +783,7 @@ def composeNews():
 			return render_template('back.html',title='Error',message=message)
 
 
-@app.route('/compoeseNews_done', methods=['post'])
+@app.route('/compoeseNews_done', methods=['post']) #Process for admin compose News
 def composeNews_done():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -805,7 +806,7 @@ def composeNews_done():
 
 #Admin
 ###############################################################################################
-@app.route('/admin')
+@app.route('/admin') #Admin home page
 def admin():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -814,12 +815,13 @@ def admin():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/admin_manage/<path:arg>')
+@app.route('/admin_manage/<path:arg>') #Page for showing data to admin
 def admin_manage(arg):
 	if session.get('admin') != None:
 		admin = session['admin']
 		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
-		if arg == 'client':
+
+		if arg == 'client': #Show client data
 			if 'R' in adminInfo['client']:
 				allClient = db.exe_fetch(SQL['allClient'],'all')
 				result = len(allClient)
@@ -832,7 +834,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'article':
+		elif arg == 'article': #Show acticle data
 			if 'R' in adminInfo['article']:
 				allArticle = db.exe_fetch(SQL['allArticle'],'all')
 				result = len(allArticle)
@@ -845,7 +847,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'revenue':
+		elif arg == 'revenue': #Show revenue data
 			if 'R' in adminInfo['revenue']: 
 				allRevenue = db.exe_fetch(SQL['allRevenue'],'all')
 				result = len(allRevenue)
@@ -856,7 +858,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'carousel':
+		elif arg == 'carousel': #Show carousel data
 			if 'R' in adminInfo['carousel']: 
 				result = 3
 				url = {}
@@ -870,7 +872,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'comment':
+		elif arg == 'comment': #Show comment data
 			if 'R' in adminInfo['comment']:  
 				allComment = db.exe_fetch(SQL['allComment'],'all')
 				maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
@@ -884,7 +886,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'comment_search': 
+		elif arg == 'comment_search': #Show comment data with searching
 			if 'R' in adminInfo['comment']: 
 				articleID = request.args.get('articleID')
 				maxArticle = len(db.exe_fetch(SQL['allArticle'],'all'))
@@ -899,7 +901,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'news': 
+		elif arg == 'news': #Show News data
 			if 'R' in adminInfo['news']: 
 				allNews = db.exe_fetch(SQL['allNews'],'all')
 				result = len(allNews)
@@ -912,7 +914,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'record':
+		elif arg == 'record': #Show record data
 			if 'R' in adminInfo['record']: 
 				allRecord = db.exe_fetch(SQL['allRecord'],'all')
 				result = len(allRecord)
@@ -925,7 +927,7 @@ def admin_manage(arg):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'admin': 
+		elif arg == 'admin': #Show admin data
 			if 'Super' in adminInfo['admin']: 
 				allAdmin = db.exe_fetch(SQL['allAdmin'],'all')
 				result = len(allAdmin)
@@ -941,13 +943,13 @@ def admin_manage(arg):
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/admin_edit/<path:arg>/<path:ID>')
+@app.route('/admin_edit/<path:arg>/<path:ID>') #Page for admin ti edit different data in datbase
 def admin_edit(arg,ID):
 	if session.get('admin') != None:
 		admin = session['admin']
 		adminInfo = db.exe_fetch(SQL['adminInfo_id'].format(id=admin))
 
-		if arg == 'client':
+		if arg == 'client': #Show detail client data in a form
 			if 'R' in adminInfo['client']: 
 				clientData = db.exe_fetch(SQL['clientInfo_ID'].format(clientID=ID))
 				return render_template('adminForm.html',title='Client',type='client',data=clientData,adminData=adminInfo)
@@ -955,7 +957,7 @@ def admin_edit(arg,ID):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'article':
+		elif arg == 'article': #Show detail article data in a form
 			if 'R' in adminInfo['article']: 
 				articleData = db.exe_fetch(SQL['articleInfo'].format(ID=ID))
 
@@ -971,7 +973,7 @@ def admin_edit(arg,ID):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'carousel': 
+		elif arg == 'carousel': #Show detail carousel data in a form
 			if 'R' in adminInfo['carousel']:
 				carouselData = {}
 				carouselData['num'] = str(ID)
@@ -986,7 +988,7 @@ def admin_edit(arg,ID):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'comment':
+		elif arg == 'comment': #Show detail comment data in a form
 			if 'R' in adminInfo['comment']: 
 				commentData = db.exe_fetch(SQL['commentInfo'].format(ID=ID))
 		
@@ -995,7 +997,7 @@ def admin_edit(arg,ID):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)				
 
-		elif arg == 'news':
+		elif arg == 'news': #Show detail news data in a form
 			if 'R' in adminInfo['comment']: 
 				newsData = db.exe_fetch(SQL['newsInfo'].format(ID=ID))
 		
@@ -1004,7 +1006,7 @@ def admin_edit(arg,ID):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'record':
+		elif arg == 'record': #Show detail record data in a form
 			if 'R' in adminInfo['comment']: 
 				recordData = db.exe_fetch(SQL['recordInfo'].format(ID=ID))
 		
@@ -1013,7 +1015,7 @@ def admin_edit(arg,ID):
 				message = 'You are not allow to read.'
 				return render_template('back.html',title='Error',message=message)
 
-		elif arg == 'admin':
+		elif arg == 'admin': #Show detail admin data in a form
 			if 'Super' in adminInfo['admin']: 
 				oneAdminData = db.exe_fetch(SQL['adminInfo_id'].format(id=ID))
 		
@@ -1025,7 +1027,7 @@ def admin_edit(arg,ID):
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/edit_client', methods=['post'])
+@app.route('/edit_client', methods=['post']) #Process for admin edit client data
 def edit_client():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1044,7 +1046,7 @@ def edit_client():
 			message = 'You are not allow to edit.'
 			return render_template('back.html',title='Error',message=message)
 
-@app.route('/edit_article', methods=['post'])
+@app.route('/edit_article', methods=['post']) #Process for admin edit article data
 def edit_article():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1084,7 +1086,7 @@ def edit_article():
 			return render_template('back.html',title='Error',message=message)
 
 
-@app.route('/edit_comment',methods=['post'])
+@app.route('/edit_comment',methods=['post']) #Process for admin edit comment data
 def edit_comment():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1102,7 +1104,7 @@ def edit_comment():
 			return render_template('back.html',title='Error',message=message)
 
 
-@app.route('/edit_news',methods=['post'])
+@app.route('/edit_news',methods=['post']) #Process for admin edit news data
 def edit_news():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1122,7 +1124,7 @@ def edit_news():
 			return render_template('back.html',title='Error',message=message)
 
 
-@app.route('/edit_carousel',methods=['post'])
+@app.route('/edit_carousel',methods=['post']) #Process for admin edit carousel data
 def edit_carousel():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1151,7 +1153,7 @@ def edit_carousel():
 			message = 'You are not allow to edit.'
 			return render_template('back.html',title='Error',message=message)
 
-@app.route('/newAdmin')
+@app.route('/newAdmin') #Page for super admin to create new admin account
 def newAdmin():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1164,7 +1166,7 @@ def newAdmin():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/edit_admin', methods=['post'])
+@app.route('/edit_admin', methods=['post']) #Process for super admin edit admin data
 def edit_admin():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1193,7 +1195,7 @@ def edit_admin():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/newAdmin_create', methods=['post'])
+@app.route('/newAdmin_create', methods=['post']) #Process for super admin create new admin account
 def newAdmin_create():
 	if session.get('admin') != None:
 		admin = session['admin']
@@ -1221,7 +1223,7 @@ def newAdmin_create():
 	else:
 		return redirect(url_for('login'))
 
-@app.route('/admin_out')
+@app.route('/admin_out') #Admin logout
 def admin_out():
 	if session.get('admin') != None:
 		session.pop('admin')
@@ -1233,15 +1235,15 @@ def admin_out():
 
 #Errorhandler
 ###############################################################################################
-@app.errorhandler(404)
+@app.errorhandler(404) #Error Handler for 404 Not Found
 def error404(e):
 	return redirect(url_for('home'))
 
-@app.errorhandler(405)
+@app.errorhandler(405) #Error Handler for 405 Method Not Allowed
 def error405(e):
 	return redirect(url_for('home'))
 
-@app.errorhandler(500)
+@app.errorhandler(500) #Error Handler for 500 Internal Server Error
 def error500(e):
 	return redirect(url_for('home'))
 ###############################################################################################

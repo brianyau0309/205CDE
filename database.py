@@ -1,6 +1,6 @@
 import pymysql
 
-class connection():
+class connection(): #To connection mysql and some function
 	def __init__(self):
 		self.connection = pymysql.connect(user='user1', password='0000', db='205CDE', cursorclass=pymysql.cursors.DictCursor)
 		self.cursor = self.connection.cursor()
@@ -18,7 +18,7 @@ class connection():
 	def close(self):
 		self.connection.close()
 
-SQL = {
+SQL = { #SQL that used in run.py
 	'clientInfo_email':'''
 SELECT * FROM client WHERE email = '{email}'
 ''',
